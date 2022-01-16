@@ -1,15 +1,5 @@
-import {argument} from "./argument";
-import {verifyErrors} from "./verifyErrors";
 import Types from "./type";
-import {
-    ParserSchemeFunction,
-    HandlerParserSchemes,
-    ValidatorsClass,
-    valuesArgs,
-    schemes,
-    valueOf
-} from "../functions/validator";
-
+import { ParserSchemeFunction, HandlerParserSchemes, ValidatorsClass, valuesArgs, schemes, valueOf } from "../functions/validator";
 /**
  * Analyze the values provided according to your schema.
  *
@@ -24,33 +14,7 @@ import {
  * @param values - data body request.
  * @returns HandlerParserSchemes
  */
-export const parserSchemes: HandlerParserSchemes = async (
-    valueOf, schemes, values
-) => {
-    const
-        /**
-         *  validate data
-         *
-         * @param result_argument - result argument
-         */
-        result_argument = await argument(valueOf ?? true, values ?? {}, schemes),
-
-        /**
-         * check for errors in arguments
-         *
-         * @param responseError - bug check response
-         */
-        responseError = await verifyErrors(result_argument.errors);
-
-    return {
-        schemes: result_argument.argument,
-        args: result_argument.body,
-        errors: responseError.errors,
-        message: responseError.message
-    }
-}
-
-
+export declare const parserSchemes: HandlerParserSchemes;
 /**
  * A Validators class, with functions that allow rigorously validating
  * data, according to a specific pattern (a schema).
@@ -62,48 +26,34 @@ export const parserSchemes: HandlerParserSchemes = async (
  *
  * @beta
  */
-export class Validators extends Types implements ValidatorsClass {
-
+export declare class Validators extends Types implements ValidatorsClass {
     /**
      * values to be validated
      * @defaultValue undefined
      */
-    values: valuesArgs = undefined;
-
+    values: valuesArgs;
     /**
      * Object type property. List of validation schemes.
      * @defaultValue object
      */
     schemes: schemes;
-
     /**
      * Boolean type property. Determines how validated arguments
      * and parameters are extracted.
      * @defaultValue true
      */
-    valueOf: valueOf = true;
-
+    valueOf: valueOf;
     /**
      * Creates an instance of Sandwiches.
      */
-    constructor(schemes?: schemes) {
-        super();
-        this.schemes = schemes ?? null;
-    }
-
+    constructor(schemes?: schemes);
     /**
      * parse and validate request body data
      *
      * @param values - Data subject to validation
      * @returns ParserSchemesResponse
      */
-    parserSchemes(values?: valuesArgs): ParserSchemeFunction
-    {
-        return parserSchemes(
-            this.valueOf, this.schemes, this.values ?? values
-        )
-    }
-
+    parserSchemes(values?: valuesArgs): ParserSchemeFunction;
     /**
      * Reset data:
      * ```ts
@@ -112,11 +62,6 @@ export class Validators extends Types implements ValidatorsClass {
      *  this.values = undefined;
      * ```
      */
-    reset() {
-        this.valueOf = true;
-        this.schemes = null;
-        this.values = undefined;
-    }
+    reset(): void;
 }
-
 export default Validators;

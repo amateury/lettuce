@@ -21,6 +21,7 @@ export const isNode: () => boolean = () => typeof global !== "undefined"
 export function isArray(elm: any): boolean {
     return Array.isArray(elm);
 }
+
 /**
  * validate if it is an objet
  *
@@ -30,6 +31,7 @@ export function isArray(elm: any): boolean {
 export function isObject(elm: any): boolean {
     return elm instanceof Object;
 }
+
 /**
  * validate if it is an string
  *
@@ -39,6 +41,7 @@ export function isObject(elm: any): boolean {
 export function isString(elm: any): boolean {
     return typeof elm === "string";
 }
+
 /**
  * validate if it is an number
  *

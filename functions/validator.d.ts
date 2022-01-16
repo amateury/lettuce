@@ -1,6 +1,8 @@
 import {messageType} from './arguments';
 export type validationFun = (value: any) => any;
 
+type FuncTypeValid = (props: any) => void;
+
 /**
  * TypeValid
  */
@@ -16,7 +18,7 @@ export interface TypeValid {
  *  scheme validation
  */
 export interface scheme {
-    type?: TypeValid,
+    type?: FuncTypeValid,
     required?: boolean,
     min?: number,
     max?: number,
@@ -77,8 +79,6 @@ export type HandlerParserSchemes = (
     schemes?: schemes,
     values?: valuesArgs
 ) => ParserSchemeFunction;
-
-type FuncTypeValid = (props: any) => void;
 
 /**
  * class Sandwiches

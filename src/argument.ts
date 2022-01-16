@@ -35,7 +35,7 @@ function ejectMessage(key: string, props: any): AR.MessageArgumentResponse | str
 
     if (props.message && key) {
         if (typeof props.message == 'string') return props.message;
-        return props.message[key];
+        if (props.message[key]) return props.message;
     }
 
     switch (key) {
@@ -144,11 +144,16 @@ const funcArguments: AR.funcArguments = {
                 errors: [{
                     [key]: [messageArgument.strict({key, type})]
                 }]
-            }, 500): true
+            }, 400): true
         }
     }
 }
 
+/**
+ *
+ * @param key -
+ * @param props -
+ */
 function validArguments(key: string, props: any): boolean {
     switch (key) {
         case 'required': return funcArguments.required(props);
@@ -176,7 +181,7 @@ async function validType ({value, key, scheme}: AR.compareProps): Promise<any> {
     const required = scheme['required'];
 
     if (type) {
-        const name = type.type;
+        const name = type.name;
         required && value ? funcArguments.validStrict(strict, name, key, value): null;
         if (value === null || value === undefined) return value;
         return funcArguments.type(value, type, scheme);
