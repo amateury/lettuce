@@ -4,10 +4,10 @@ import Types from "./type";
 import {
     ParserSchemeFunction,
     HandlerParserSchemes,
-    ValidatorsClass,
     valuesArgs,
     schemes,
-    valueOf
+    valueOf,
+    LettuceInterface
 } from "../functions/validator";
 
 /**
@@ -62,7 +62,7 @@ export const parserSchemes: HandlerParserSchemes = async (
  *
  * @beta
  */
-export class Validators extends Types implements ValidatorsClass {
+export class Lettuce extends Types implements LettuceInterface {
 
     /**
      * values to be validated
@@ -119,4 +119,4 @@ export class Validators extends Types implements ValidatorsClass {
     }
 }
 
-export default Validators;
+export default Lettuce;

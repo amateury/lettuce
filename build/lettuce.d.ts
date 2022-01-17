@@ -26,7 +26,7 @@ export declare const parserSchemes: HandlerParserSchemes;
  *
  * @beta
  */
-export declare class Validators extends Types implements ValidatorsClass {
+export declare class Lettuce extends Types implements ValidatorsClass {
     /**
      * values to be validated
      * @defaultValue undefined
@@ -64,4 +64,4 @@ export declare class Validators extends Types implements ValidatorsClass {
      */
     reset(): void;
 }
-export default Validators;
+export default Lettuce;

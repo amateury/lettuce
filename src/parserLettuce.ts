@@ -1,21 +1,21 @@
 import {
     ParserSchemeFunction,
-    ParserSchemesClass,
     valuesArgs,
     schemes,
     scheme,
     FuncResolvePromiseScheme,
-    resolvePromiseScheme
+    resolvePromiseScheme,
+    ParserLettuceInterface
 } from "../functions/validator";
-import Validators from './lettuce'
+import Lettuce from './lettuce'
 
-const validator = new Validators();
+const validator = new Lettuce();
 
 /**
  * addSchemes add schemes
  *
  * @privateRemarks
- * addSchemes function serving the ParserSchemes class for
+ * addSchemes function serving the ParserLettuce class for
  * adding validation schemes
  *
  * @param schemes - Validation schemes
@@ -62,10 +62,10 @@ const addPropertySchemesValidator = <T>(schemesEntries: [keyof T, T[keyof T]][])
     })
 }
 
-export class ParserSchemes implements ParserSchemesClass {
+export class ParserLettuce implements ParserLettuceInterface {
 
     /**
-     * instance ParserSchemes
+     * instance ParserLettuce
      */
     constructor(valueOf?: boolean) {
         validator.reset();

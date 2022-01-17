@@ -1,10 +1,10 @@
-import Validators from './lettuce';
+import Lettuce from './lettuce';
 import Types from "./type";
-import {ParserSchemes} from './parserScheme';
+import {ParserLettuce} from './parserLettuce';
 
 export {
-    ParserSchemes,
+    ParserLettuce,
     Types
 }
 
-export default  Validators;
+export default  Lettuce;

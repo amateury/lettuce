@@ -1,4 +1,5 @@
 import {messageType} from './arguments';
+import Lettuce from "../src";
 export type validationFun = (value: any) => any;
 
 type FuncTypeValid = (props: any) => void;
@@ -33,17 +34,28 @@ export interface scheme {
  */
 export type schemes = {[index: string]: scheme} | null;
 
-/**
- *
- */
-export type ParserSchemesResponse = {
+interface ParserDefault {
     schemes: any,
     args: {[index: string | number]},
     errors: any[],
     message: string,
 }
 
-export type ParserSchemeFunction = Promise<ParserSchemesResponse>;
+type OptionsFlags<Type> = {
+    [Property in keyof Type]: Type[Property];
+};
+
+/**
+ *
+ */
+export type ParserSchemesResponse<Args = ParserDefault> = {
+    schemes: Args extends ParserDefault ? ParserDefault["schemes"]: Args["schemes"],
+    args: Args extends ParserDefault ? ParserDefault["args"]:  OptionsFlags<Args["args"]>,
+    errors: Args extends ParserDefault ? ParserDefault["errors"]: Args["errors"],
+    message: Args extends ParserDefault ? ParserDefault["message"]: keyof Args["message"],
+}
+
+export type ParserSchemeFunction = Promise<ParserSchemesResponse<any>>;
 
 /**
  *
@@ -55,7 +67,7 @@ type valuesArgs = {[index: string | number]} | undefined;
  */
 type valueOf = boolean;
 
-export interface ParserSchemesClass {
+export interface ParserLettuceInterface {
     parserSchemes(values?: valuesArgs): ParserSchemeFunction;
     /**
      *
@@ -84,7 +96,7 @@ export type HandlerParserSchemes = (
  * class Sandwiches
  *
  */
-export interface ValidatorsClass extends TypeValid {
+export interface LettuceInterface extends TypeValid {
     readonly schemes: schemes;
     /**
      *
