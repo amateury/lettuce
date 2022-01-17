@@ -34,26 +34,15 @@ export interface scheme {
  */
 export type schemes = {[index: string]: scheme} | null;
 
-interface ParserDefault {
+/**
+ *
+ */
+export type ParserSchemesResponse = {
     schemes: any,
     args: {[index: string | number]},
     errors: any[],
     message: string,
-}
-
-type OptionsFlags<Type> = {
-    [Property in keyof Type]: Type[Property];
 };
-
-/**
- *
- */
-export type ParserSchemesResponse<Args = ParserDefault> = {
-    schemes: Args extends ParserDefault ? ParserDefault["schemes"]: Args["schemes"],
-    args: Args extends ParserDefault ? ParserDefault["args"]:  OptionsFlags<Args["args"]>,
-    errors: Args extends ParserDefault ? ParserDefault["errors"]: Args["errors"],
-    message: Args extends ParserDefault ? ParserDefault["message"]: keyof Args["message"],
-}
 
 export type ParserSchemeFunction = Promise<ParserSchemesResponse<any>>;
 

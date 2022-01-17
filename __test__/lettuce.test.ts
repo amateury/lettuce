@@ -19,7 +19,7 @@ test('Validations schema success', async function () {
 
     async function validation() {
 
-        const resp0: ParserSchemesResponse<Args> = await validator.parserSchemes(userScheme);
+        const resp0: Args = await validator.parserSchemes(userScheme);
 
         expect(resp0.args.email.valueOf()).toBe(userScheme.email);
         expect(resp0.args.password.valueOf()).toBe(userScheme.password);
@@ -27,7 +27,7 @@ test('Validations schema success', async function () {
 
         validator.valueOf = false;
 
-        const resp1: ParserSchemesResponse<Args> = await validator.parserSchemes(userScheme);
+        const resp1: ParserSchemesResponse = await validator.parserSchemes(userScheme);
 
         expect(resp1.args.email).toBe(userScheme.email);
         expect(resp1.args.password).toBe(userScheme.password);

@@ -1,4 +1,6 @@
-export interface Args {
+import {ParserSchemesResponse} from "../functions/validator";
+
+export interface Args extends  ParserSchemesResponse{
     args: {
         email: string,
         password: string,
