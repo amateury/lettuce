@@ -31,6 +31,23 @@ const messageArgument: AR.MessageArgument = {
     })
 }
 
+/**
+ * Extract validation error message
+ * 
+ * @param key - validation key name
+ * @param props - values for error interpretation
+ * @returns - Json
+ * 
+ * @example 
+ * Example of validation error of the minimum data required (min)
+ * 
+ * ```json
+ * {
+        message: "minimum_characters",
+        value: 8
+    }
+ * ```
+ */
 function ejectMessage(key: string, props: any): AR.MessageArgumentResponse | string {
 
     if (props.message && key) {
@@ -52,9 +69,9 @@ function ejectMessage(key: string, props: any): AR.MessageArgumentResponse | str
 /**
  *  list of validation functions
  *
- * @param funcArguments -
  */
 const funcArguments: AR.funcArguments = {
+
     /**
      *  * custom validation, for the data type specified in the argument
      *
@@ -66,54 +83,56 @@ const funcArguments: AR.funcArguments = {
      *  }
      * }
      * ```
-     * @param validValue -
-     * @param value -
+     * @param validValue - validation function
+     * @param value - value to validate
      */
     validation: ({validValue, value}) => validValue(value),
+
     /**
      * Validate value max
      *
-     * @param type -
-     * @param validValue -
-     * @param value -
+     * @param validValue - comparison value for validation
+     * @param value - value to validate
      */
-    max: ({type, validValue, value}) => {
+    max: ({validValue, value}) => {
         if (typeof value === 'number'){
             return (value ?? 0) <= (validValue ?? 0);
         } else {
-            const len = (type?.length ?? 0) ?? (type?.toString()?.length ?? 0);
+            const len = (value?.length ?? 0) ?? (value?.toString()?.length ?? 0);
             return len <= (validValue ?? 0);
         }
 
     },
+
     /**
      * Validate value min
      *
-     * @param type -
-     * @param validValue -
-     * @param value -
+     * @param validValue - comparison value for validation
+     * @param value - value to validate
      */
-    min: ({type, validValue, value}) => {
+    min: ({validValue, value}) => {
         if (typeof value === 'number'){
             return (validValue ?? 0) >= (validValue ?? 0);
         } else {
-            const len = (type?.length ?? 0) ?? (type?.toString()?.length ?? 0);
+            const len = (value?.length ?? 0) ?? (value?.toString()?.length ?? 0);
             return len >= (validValue ?? 0);
         }
     },
+
     /**
      * validate value required
      *
-     * @param validValue -
-     * @param value -
+     * @param validValue - comparison value for validation
+     * @param value - value to validate
      */
     required: ({validValue, value}) => validValue ? (!!value || value === 0) : true,
+
     /**
      * Validate value type
      *
-     * @param value -
-     * @param func -
-     * @param scheme -
+     * @param value - value to validate
+     * @param func - Objeto primitivo correspondiente al tipo de dato declarado para validación
+     * @param scheme - scheme data
      */
      type: (value, func, scheme) => {
         const list_type = ['String', 'Number', 'Object'];
@@ -127,6 +146,7 @@ const funcArguments: AR.funcArguments = {
                 return func(value, scheme);
         }
     },
+
     /**
      * Strictly validates the value of a data type
      *
@@ -150,9 +170,10 @@ const funcArguments: AR.funcArguments = {
 }
 
 /**
+ * Validar argumentos según su key de validación
  *
- * @param key -
- * @param props -
+ * @param key - 'required'
+ * @param props - schema data
  */
 function validArguments(key: string, props: any): boolean {
     switch (key) {
@@ -205,7 +226,7 @@ function validData(
 
         const {value, scheme, message, key: keyMain} = props;
 
-        if(!validArguments(keyValid,{validValue, value, type, scheme})) {
+        if(!validArguments(keyValid, {validValue, value, type, scheme})) {
             resolve(ejectMessage(keyValid, {validValue, value, type, keyValid, keyMain, message}));
         }
 
