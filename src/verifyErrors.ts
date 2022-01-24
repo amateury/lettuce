@@ -8,7 +8,7 @@ export const MessageValidationSuccessful = "args_validation_successful"
  * 
  * @param response - data response
  */
-function error(response: ResponseVerifyErrors): ResponseVerifyErrors {
+export function error(response: ResponseVerifyErrors): ResponseVerifyErrors {
     throw response;
 }
 
@@ -18,7 +18,7 @@ function error(response: ResponseVerifyErrors): ResponseVerifyErrors {
  * @param response - data response
  * @param code - status code
  */
-function responseServerError(response: ResponseVerifyErrors, code: number): ResponseVerifyErrors {
+ export function responseServerError(response: ResponseVerifyErrors, code: number): ResponseVerifyErrors {
     const {message, errors} = response;
     throw {"statusCode": code, "message": message, errors};
 }
@@ -31,8 +31,7 @@ function responseServerError(response: ResponseVerifyErrors, code: number): Resp
  */
 export function exception(response: ResponseVerifyErrors, code: number) {
     typeof window !== 'undefined'
-    && ({}).toString.call(window) === '[object Window]'
-        ? error(response) : responseServerError(response, code);
+    && ({}).toString.call(window) === '[object Window]' ? error(response) : responseServerError(response, code);
 }
 
 /**

@@ -62,5 +62,5 @@ validate.set('String', isString);
 validate.set('Number', isNumber);
 validate.set('Object', isObject);
 validate.set('Browser', isBrowser);
-validate.set('Browser', isNode);
+validate.set('Node', isNode);
 

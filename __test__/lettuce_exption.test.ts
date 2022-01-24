@@ -45,7 +45,7 @@ test('Validations schema exception', async function () {
 
     expect.assertions(2);
     await validation().catch(error => {
-        expect(error.errors[0].password[0]).toMatch('Error validation')
-        expect(error.message).toMatch('args_validation_errors')
+        expect(error.errors[0].password[0]).toBe('Error validation')
+        expect(error.message).toBe('args_validation_errors')
     });
 });
