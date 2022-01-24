@@ -2,7 +2,7 @@ import * as AR from '../functions/arguments';
 import * as VA from '../functions/validator';
 import * as VE from '../functions/verifyErrors';
 import {validate} from "./help";
-import {exception} from './verifyErrors'
+import {exception, MessageValidationErrors} from './verifyErrors'
 
 /**
  *
@@ -155,14 +155,16 @@ const funcArguments: AR.funcArguments = {
      * @param key - data (occupation)
      * @param value - `Developer`
      */
-    validStrict: (strict, type, key, value) => {
+    validStrict: (strict, type, key, value, scheme) => {
         const valid = validate.get(type);
+        const objMessage = scheme.message ?? {};
+        const message = objMessage ?? objMessage[key];
 
         if (strict && valid) {
             !valid(value) ? exception({
-                message: "args_validation_errors",
+                message: MessageValidationErrors,
                 errors: [{
-                    [key]: [messageArgument.strict({key, type})]
+                    [key]: [message ?? messageArgument.strict({key, type})]
                 }]
             }, 400): true
         }
@@ -197,13 +199,15 @@ function validArguments(key: string, props: any): boolean {
  * ```
  */
 async function validType ({value, key, scheme}: AR.compareProps): Promise<any> {
-    const type: any = scheme['type'];
-    const strict = scheme['strict'];
-    const required = scheme['required'];
+    const type: VA.FuncTypeValid | undefined = scheme['type'];
+    const strict: boolean | undefined = scheme['strict'];
+    const required: boolean | undefined = scheme['required'];
 
     if (type) {
         const name = type.name;
-        required && value ? funcArguments.validStrict(strict, name, key, value): null;
+        required && value ? funcArguments.validStrict(
+            strict, name, key, value, scheme
+            ): null;
         if (value === null || value === undefined) return value;
         return funcArguments.type(value, type, scheme);
     } else {

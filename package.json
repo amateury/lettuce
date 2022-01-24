@@ -1,5 +1,5 @@
 {
-  "name": "@amateour/lettuce",
+  "name": "@amateury/lettuce",
   "version": "0.1.0",
   "description": "It is a library that allows a rigorous validation of the data, according to a specific pattern (a scheme).",
   "main": "build/index.js",
@@ -7,6 +7,7 @@
   "types": "build/index.d.ts",
   "scripts": {
     "test": "jest",
+    "test-coverage": "jest --coverage && coveralls < coverage/lcov.info",
     "build": "npx webpack --config webpack.config.js --mode=production",
     "build:dev": "npx webpack --config webpack.config.js --mode=development",
     "watch": "node_modules/.bin/webpack --config webpack.config.js --mode=development -w",
@@ -19,10 +20,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/amateour/lettuce.git"
+    "url": "git+https://github.com/amateury/lettuce.git"
   },
   "bugs": {
-    "url": "https://github.com/amateour/lettuce/issues"
+    "url": "https://github.com/amateury/lettuce/issues"
   },
   "keywords": [
     "lettuce",

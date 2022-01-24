@@ -1,5 +1,8 @@
 import {ResponseVerifyErrors, ErrorStatus} from "../functions/verifyErrors";
 
+export const MessageValidationErrors = "args_validation_errors";
+export const MessageValidationSuccessful = "args_validation_successful"
+
 /**
  * Generate exception
  * 
@@ -43,12 +46,12 @@ export async function verifyErrors(
 
     const response: ResponseVerifyErrors = {
         errors: [],
-        message: 'args_validation_successful'
+        message: MessageValidationSuccessful
     }
 
     if (errors.length) {
         response.errors = errors;
-        response.message = 'args_validation_errors';
+        response.message = MessageValidationErrors;
         exception(response, 400);
     } else {
         return response

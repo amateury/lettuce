@@ -6,13 +6,18 @@ import {Args} from './types';
 const userScheme = {
     email: 'lettuce@amateour.com',
     password: '12345678',
-    confirmPassword: '12345678'
+    confirmPassword: '12345678',
+    lastName: "Brayan Salgado"
 }
 
 const validator = new Lettuce({
-    email: {type: Types.String, required: true, strict: true},
+    id: {
+        type: Types.String, required: true, value: 'dd89918b-6638-4f18-ad22-c80b416ac89e', strict: true
+    },
+    email: {type: Types.String, required: true, strict: true, validation: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)},
     password: {type: Types.String, required: true, strict: true, min: 8},
-    confirmPassword: {type: Types.String, required: true, strict: true, min: 8}
+    confirmPassword: {type: Types.String, required: true, strict: true, min: 8},
+    lastName: {type: Types.String, required: true, strict: true, min: 2, max: 50}
 });
 
 test('Validations schema success', async function () {
@@ -21,6 +26,7 @@ test('Validations schema success', async function () {
 
         const resp0: Args = await validator.parserSchemes(userScheme);
 
+        expect(resp0.args.id.valueOf()).toBe('dd89918b-6638-4f18-ad22-c80b416ac89e');
         expect(resp0.args.email.valueOf()).toBe(userScheme.email);
         expect(resp0.args.password.valueOf()).toBe(userScheme.password);
         expect(resp0.message).toBe("args_validation_successful");
@@ -29,6 +35,8 @@ test('Validations schema success', async function () {
 
         const resp1: ParserSchemesResponse = await validator.parserSchemes(userScheme);
 
+        expect(resp1.args.id).toBe('dd89918b-6638-4f18-ad22-c80b416ac89e');
+        expect(resp1.args.email.valueOf()).toBe(userScheme.email);
         expect(resp1.args.email).toBe(userScheme.email);
         expect(resp1.args.password).toBe(userScheme.password);
         expect(resp1.message).toBe("args_validation_successful");
@@ -37,14 +45,3 @@ test('Validations schema success', async function () {
     await validation();
 });
 
-test('Validations schema exception', async function () {
-
-    async function validation() {
-        await validator.parserSchemes({});
-    }
-
-    expect.assertions(1);
-    await validation().catch(error => {
-        expect(error.message).toMatch('args_validation_errors')
-    });
-});

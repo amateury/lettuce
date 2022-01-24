@@ -85,8 +85,16 @@ export type HandlerParserSchemes = (
  * class Sandwiches
  *
  */
-export interface LettuceInterface extends TypeValid {
+export class LettuceInterface extends TypeValid {
+    /**
+     * 
+     */
     readonly schemes: schemes;
+    /**
+     * Creates an instance of Sandwiches.
+     * @param schemes - schemes of validations
+     */
+    constructor(schemes?: schemes): void;
     /**
      *
      */
@@ -101,6 +109,10 @@ export interface LettuceInterface extends TypeValid {
      * @returns ParserSchemeFunction
      */
     parserSchemes(body?: valuesArgs): ParserSchemeFunction;
+    /**
+     * 
+     */
+    reset(): void;
 }
 
 /**

@@ -1,5 +1,5 @@
 import Types from "./type";
-import { ParserSchemeFunction, HandlerParserSchemes, ValidatorsClass, valuesArgs, schemes, valueOf } from "../functions/validator";
+import { ParserSchemeFunction, HandlerParserSchemes, valuesArgs, schemes, valueOf, LettuceInterface } from "../functions/validator";
 /**
  * Analyze the values provided according to your schema.
  *
@@ -26,7 +26,7 @@ export declare const parserSchemes: HandlerParserSchemes;
  *
  * @beta
  */
-export declare class Lettuce extends Types implements ValidatorsClass {
+export declare class Lettuce extends Types implements LettuceInterface {
     /**
      * values to be validated
      * @defaultValue undefined

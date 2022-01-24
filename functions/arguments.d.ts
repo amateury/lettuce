@@ -1,6 +1,12 @@
 import {TypeValid, scheme, schemes} from './validator';
 import {ErrorStatus} from "./verifyErrors";
 
+
+/**
+ * messageType
+ */
+ export type messageType = string | {[index: string]: string} | null;
+
 /**
  * keyType
  */
@@ -51,6 +57,9 @@ export interface argValid {
  *  list of validation functions
  */
 export interface funcArguments {
+    /**
+     * 
+     */
     validation: ({type, valid_value, value}: argValid) => boolean,
     /**
      * Validate value max
@@ -94,7 +103,7 @@ export interface funcArguments {
      * {(strict: boolean, type: string, key: keyType, value: valueType)}
      * ```
      */
-    validStrict: (strict: boolean | undefined, name: string, key: keyType, value: valueType) => any
+    validStrict: (strict: boolean | undefined, name: string, key: keyType, value: valueType, scheme: scheme) => any
 }
 
 /**
@@ -127,10 +136,6 @@ export type validArgumentResp = {
     value: string | any[] | number | boolean | object
 }
 
-/**
- * messageType
- */
-export type messageType = {[index: string]: string} | string | null;
 
 /**
  * compareProps

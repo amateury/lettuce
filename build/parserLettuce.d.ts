@@ -1,5 +1,5 @@
-import { ParserSchemeFunction, ParserSchemesClass, valuesArgs, schemes, scheme } from "../functions/validator";
-export declare class ParserLettuce implements ParserSchemesClass {
+import { ParserSchemeFunction, valuesArgs, schemes, scheme, ParserLettuceInterface } from "../functions/validator";
+export declare class ParserLettuce implements ParserLettuceInterface {
     /**
      * instance ParserLettuce
      */
