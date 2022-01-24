@@ -25,6 +25,10 @@
   "bugs": {
     "url": "https://github.com/amateury/lettuce/issues"
   },
+  "files": [
+    "build",
+    "functions"
+  ],
   "keywords": [
     "lettuce",
     "validator",
@@ -32,7 +36,8 @@
     "express",
     "connect",
     "api",
-    "argument"
+    "argument",
+    "amateur"
   ],
   "author": "Brayan Salgado",
   "license": "MIT",
