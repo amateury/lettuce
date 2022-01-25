@@ -27,7 +27,7 @@ export interface scheme {
     required?: boolean,
     min?: number,
     max?: number,
-    value?: any,
+    value?: ((value: any) => any) |any,
     strict?: boolean,
     validation?: validationFun,
     message?: messageType
@@ -80,7 +80,7 @@ export interface ParserLettuceInterface {
  *
  */
 export type HandlerParserSchemes = (
-    valueOf?: valueOf,
+    valueOf: valueOf,
     schemes?: schemes,
     values?: valuesArgs
 ) => ParserSchemeFunction;

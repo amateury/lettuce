@@ -7,12 +7,18 @@ const userScheme = {
     email: 'lettuce@amateour.com',
     password: '12345678',
     confirmPassword: '12345678',
-    lastName: "Brayan Salgado"
+    lastName: "Brayan Salgado",
+    nickName: "binariado"
 }
 
 const schemes = {
     id: {
         type: Types.String, required: true, value: 'dd89918b-6638-4f18-ad22-c80b416ac89e', strict: true
+    },
+    nickName: {
+        type: Types.String, required: false, value:(value: string) => {
+            return `${value}-01`
+        }, strict: true
     },
     email: {type: Types.String, required: true, strict: true, validation: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)},
     password: {type: Types.String, required: true, strict: true, min: 8},
@@ -27,11 +33,12 @@ test('Validations schema success', async function () {
     async function validation() {
 
         const resp0: Args = await validator.parserSchemes(userScheme);
-
+        
+        expect(resp0.args.nickName.valueOf()).toBe('binariado-01');
         expect(resp0.args.id.valueOf()).toBe('dd89918b-6638-4f18-ad22-c80b416ac89e');
         expect(resp0.args.email.valueOf()).toBe(userScheme.email);
         expect(resp0.args.password.valueOf()).toBe(userScheme.password);
-        expect(resp0.message).toBe("args_validation_successful");
+        expect(resp0.message).toBe('args_validation_successful');
 
         validator.reset()
 
@@ -42,6 +49,7 @@ test('Validations schema success', async function () {
 
         const resp1: ParserSchemesResponse = await validator.parserSchemes(userScheme);
 
+        expect(resp1.args.nickName).toBe('binariado-01');
         expect(resp1.args.id).toBe('dd89918b-6638-4f18-ad22-c80b416ac89e');
         expect(resp1.args.email.valueOf()).toBe(userScheme.email);
         expect(resp1.args.email).toBe(userScheme.email);

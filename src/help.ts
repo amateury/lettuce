@@ -1,16 +1,16 @@
 import * as SW from '../functions/help';
 
-/**
- * Identify if it is running in a browser
- */
-export const isBrowser: () => boolean = () => typeof window !== 'undefined'
-    && ({}).toString.call(window) === '[object Window]';
 
 /**
  * Identify if it is running in a nodejs
  */
-export const isNode: () => boolean = () => typeof global !== "undefined"
-    && ({}).toString.call(global) === '[object Object]';
+ export const isNode: () => boolean = () => typeof global !== "undefined"
+ && ({}).toString.call(global) === '[object Object]';
+
+/**
+ * Identify if it is running in a browser
+ */
+export const isBrowser: () => boolean = () => !isNode();
 
 /**
  * validate if it is an array

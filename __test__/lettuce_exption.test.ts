@@ -1,24 +1,53 @@
-import { scheme } from '../functions/validator';
+import {scheme} from '../functions/validator';
 import Lettuce from '../src/lettuce';
+import {validArguments, ejectMessage} from '../src/argument';
 import Types from '../src/type';
 
+test('Scheme is undefined', async function () {
+    try {
+        const validator = new Lettuce();
 
-// test('Error validation type undefined', async function () {
-//     try {
-//         validArguments('data', {})
-//         ejectMessage('data', {})
-//     } catch (error: any) {
-//         expect(error).toBe('non-specific validation function')
-//     }
+        await validator.parserSchemes({});
+    } catch (error: any) {
+        expect(error.message).toBe('schemes is undefined')
+    }
 
-//     try {
-//         ejectMessage('data', {})
-//     } catch (error: any) {
-//         expect(error).toBe('non-specific validation function: undefined response message')
-//     }
+    expect.assertions(1);
+});
 
-//     expect.assertions(2);
-// });
+test('Values is undefined', async function () {
+    try {
+        const validator = new Lettuce({
+            password: {
+                type: Types.String,
+                required: true,
+            }
+        });
+
+        await validator.parserSchemes();
+    } catch (error: any) {
+        expect(error.message).toBe('args_validation_errors')
+    }
+
+    expect.assertions(1);
+});
+
+test('Error validation type undefined', async function () {
+    try {
+        validArguments('data', {})
+        ejectMessage('data', {})
+    } catch (error: any) {
+        expect(error).toBe('non-specific validation function')
+    }
+
+    try {
+        ejectMessage('data', {})
+    } catch (error: any) {
+        expect(error).toBe('non-specific validation function: undefined response message')
+    }
+
+    expect.assertions(2);
+});
 
 test('Exception for the minimum and maximum required', async function () {
 

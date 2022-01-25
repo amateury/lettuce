@@ -6,6 +6,7 @@ export interface Args extends  ParserSchemesResponse{
         password: string,
         confirmPassword: string,
         lastName: string,
-        id: string
+        id: string,
+        nickName: string
     }
 }

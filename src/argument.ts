@@ -48,7 +48,7 @@ const messageArgument: AR.MessageArgument = {
     }
  * ```
  */
-function ejectMessage(key: string, props: any): AR.MessageArgumentResponse | string {
+export function ejectMessage(key: string, props: any): AR.MessageArgumentResponse | string {
 
     if (props.message && key) {
         if (typeof props.message == 'string') return props.message;
@@ -96,10 +96,10 @@ const funcArguments: AR.funcArguments = {
      */
     max: ({validValue, value}) => {
         if (typeof value === 'number') {
-            return new String(value).length <= (validValue ?? 0);
+            return new String(value).length <= (validValue);
         } else {
-            const len = (value?.length ?? 0) ?? (value?.toString()?.length ?? 0);
-            return len <= (validValue ?? 0);
+            const len = value.length;
+            return len <= validValue;
         }
     },
 
@@ -111,10 +111,10 @@ const funcArguments: AR.funcArguments = {
      */
     min: ({validValue, value}) => {
         if (typeof value === 'number') {
-            return new String(value).length >= (validValue ?? 0);
+            return new String(value).length >= (validValue);
         } else {
-            const len = (value?.length ?? 0) ?? (value?.toString()?.length ?? 0);
-            return len >= (validValue ?? 0);
+            const len = value.length;
+            return len >= (validValue);
         }
     },
 
@@ -124,7 +124,8 @@ const funcArguments: AR.funcArguments = {
      * @param validValue - comparison value for validation
      * @param value - value to validate
      */
-    required: ({validValue, value}) => validValue ? (!!value || value === 0) : true,
+    required: ({validValue, value}) => validValue ? 
+    (!!value || value === 0) : !validValue,
 
     /**
      * Validate value type
@@ -175,7 +176,7 @@ const funcArguments: AR.funcArguments = {
  * @param key - 'required'
  * @param props - schema data
  */
-function validArguments(key: string, props: any): boolean {
+export function validArguments(key: string, props: any): boolean {
     switch (key) {
         case 'required': return funcArguments.required(props);
         case 'min': return funcArguments.min(props);
@@ -249,36 +250,32 @@ async function validExtractArgument (
 ): Promise<(AR.MessageArgumentResponse | boolean)[]> {
     const validResponse = [];
     const {scheme} = props;
+    const {required , min, max, validation} = scheme;
+
+    const resp = await validData(props, type, required, 'required')
+    if(resp) validResponse.push(resp);
 
     /**
      *
      */
-    if(scheme['required']) {
-        const resp = await validData(props, type, scheme['required'], 'required')
+    if(min){
+        const resp = await validData(props, type, min, 'min');
         if(resp) validResponse.push(resp);
     }
 
     /**
      *
      */
-    if(scheme['min']){
-        const resp = await validData(props, type, scheme['min'], 'min');
+    if(max) {
+        const resp = await validData(props, type, max, 'max');
         if(resp) validResponse.push(resp);
     }
 
     /**
      *
      */
-    if(scheme['max']) {
-        const resp = await validData(props, type, scheme['max'], 'max');
-        if(resp) validResponse.push(resp);
-    }
-
-    /**
-     *
-     */
-    if(scheme['validation']) {
-        const resp =await validData(props, type, scheme['validation'], 'validation')
+    if(validation) {
+        const resp =await validData(props, type, validation, 'validation')
         if(resp) validResponse.push(resp)
     }
 
@@ -325,9 +322,12 @@ async function validArgument (props: AR.compareProps): Promise<AR.validArgumentR
  * @param scheme -
  * @param key - field key to validate
  */
-function getValue(reqBody: { [index: string | number]: any }, scheme: VA.scheme, key: string | number): any {
-    const definedValue = scheme['value'] ?? reqBody[key];
-    return definedValue instanceof Function ? definedValue() : definedValue;
+function getValue(reqBody: VA.valuesArgs, scheme: VA.scheme, key: string | number): any {
+    
+    const {value} = scheme;
+    const valueOriginal = reqBody ? reqBody[key]: undefined;
+    const definedValue = value ?? valueOriginal;
+    return definedValue instanceof Function ? definedValue(valueOriginal) : definedValue;
 }
 
 /**
@@ -341,39 +341,36 @@ function getValue(reqBody: { [index: string | number]: any }, scheme: VA.scheme,
  * @param schemes - schemes of validation `{ email: {type: Sandwich.String, strict: true} }`
  */
 export async function argument(
-    valueOf: boolean = true, reqBody: object =  {}, schemes?: VA.schemes
+    valueOf: boolean, reqBody: VA.valuesArgs, schemes?: VA.schemes
 ): Promise<AR.argumentProps> {
+
     const resp = {};
     const body = {};
-    const errors: VE.ErrorStatus[] = []
+    const errors: VE.ErrorStatus[] = [];
 
-    if(!schemes) exception({message: `schemes is ${schemes}`}, 500)
+    if(!schemes) exception({message: `schemes is ${schemes}`}, 500);
 
     for (const key in schemes) {
-        const scheme = schemes[key] ?? null;
-        if(scheme) {
+        const scheme = schemes[key];
+        const validated = await validArgument({
+            value: getValue(reqBody, scheme, key),
+            key: key,
+            message: scheme['message'] ?? null,
+            scheme: scheme
+        });
 
-            const validated = await validArgument({
-                value: getValue(reqBody, scheme, key),
-                key: key,
-                message: scheme['message'] ?? null,
-                scheme: scheme
-            });
+        Object.defineProperty(resp, key, {
+            enumerable: true,
+            value: validated
+        });
 
-            Object.defineProperty(resp, key, {
-                enumerable: true,
-                value: validated
-            });
+        Object.defineProperty(body, key, {
+            enumerable: true,
+            value: valueOf || !validated.value ? validated.value : validated.value.valueOf()
+        });
 
-            Object.defineProperty(body, key, {
-                enumerable: true,
-                value: valueOf || !validated.value ? validated.value : validated.value.valueOf()
-            });
-
-            if (validated.errors.length) {
-                errors.push({[key]: validated.errors})
-            }
-
+        if (validated.errors.length) {
+            errors.push({[key]: validated.errors})
         }
     }
 
