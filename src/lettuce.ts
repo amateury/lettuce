@@ -33,18 +33,18 @@ export const parserSchemes: HandlerParserSchemes = async (
          *
          * @param result_argument - result argument
          */
-        result_argument = await argument(valueOf ?? true, values ?? {}, schemes),
+        resultArgument = await argument(valueOf, values, schemes),
 
         /**
          * check for errors in arguments
          *
          * @param responseError - bug check response
          */
-        responseError = await verifyErrors(result_argument.errors);
+        responseError = await verifyErrors(resultArgument.errors);
 
     return {
-        schemes: result_argument.argument,
-        args: result_argument.body,
+        schemes: resultArgument.argument,
+        args: resultArgument.body,
         errors: responseError.errors,
         message: responseError.message
     }
@@ -74,7 +74,7 @@ export class Lettuce extends Types implements LettuceInterface {
      * Object type property. List of validation schemes.
      * @defaultValue object
      */
-    schemes: schemes;
+    schemes: schemes | undefined = undefined;
 
     /**
      * Boolean type property. Determines how validated arguments
@@ -88,7 +88,7 @@ export class Lettuce extends Types implements LettuceInterface {
      */
     constructor(schemes?: schemes) {
         super();
-        this.schemes = schemes ?? null;
+        this.schemes = schemes;
     }
 
     /**
@@ -114,7 +114,7 @@ export class Lettuce extends Types implements LettuceInterface {
      */
     reset() {
         this.valueOf = true;
-        this.schemes = null;
+        this.schemes = undefined;
         this.values = undefined;
     }
 }

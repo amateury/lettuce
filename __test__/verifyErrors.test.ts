@@ -4,19 +4,31 @@ import {
     verifyErrors,
     MessageValidationErrors,
     MessageValidationSuccessful,
-    error,
-    responseServerError
+    exception
 } from "../src/verifyErrors";
 
 
-test('Args validation errors', async () => {
+test('Message validation errors', async () => {
     expect(MessageValidationErrors).toBe('args_validation_errors');
     expect(MessageValidationSuccessful).toBe('args_validation_successful');
 });
 
-test('Args validation errors', async () => {
+test('Error response (browser)', async () => {
     try {
-        responseServerError({
+        exception({
+            message: "error_validation",
+        }) 
+    } catch (error) {
+        const {message} : any = error;
+        expect(message).toBe('error_validation');
+    }
+
+    expect.assertions(1);
+});
+
+test('Error response (Server)', async () => {
+    try {
+        exception({
             message: "error_validation",
         }, 500) 
     } catch (error) {
@@ -26,19 +38,6 @@ test('Args validation errors', async () => {
     }
 
     expect.assertions(2);
-});
-
-test('Args validation errors', async () => {
-    try {
-        error({
-            "message": "error_validation"
-        }) 
-    } catch (error) {
-        const {message} : any = error;
-        expect(message).toBe('error_validation');
-    }
-
-    expect.assertions(1);
 });
 
 test('Args validation errors', async () => {

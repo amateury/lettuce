@@ -10,7 +10,7 @@ import {ErrorStatus} from "./verifyErrors";
 /**
  * keyType
  */
-export type keyType = number | string;
+export type keyType = string;
 
 /**
  * respType

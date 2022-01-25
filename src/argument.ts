@@ -52,7 +52,7 @@ function ejectMessage(key: string, props: any): AR.MessageArgumentResponse | str
 
     if (props.message && key) {
         if (typeof props.message == 'string') return props.message;
-        if (props.message[key]) return props.message;
+        if (props.message[key]) return props.message[key];
     }
 
     switch (key) {
@@ -95,13 +95,12 @@ const funcArguments: AR.funcArguments = {
      * @param value - value to validate
      */
     max: ({validValue, value}) => {
-        if (typeof value === 'number'){
-            return (value ?? 0) <= (validValue ?? 0);
+        if (typeof value === 'number') {
+            return new String(value).length <= (validValue ?? 0);
         } else {
             const len = (value?.length ?? 0) ?? (value?.toString()?.length ?? 0);
             return len <= (validValue ?? 0);
         }
-
     },
 
     /**
@@ -111,8 +110,8 @@ const funcArguments: AR.funcArguments = {
      * @param value - value to validate
      */
     min: ({validValue, value}) => {
-        if (typeof value === 'number'){
-            return (validValue ?? 0) >= (validValue ?? 0);
+        if (typeof value === 'number') {
+            return new String(value).length >= (validValue ?? 0);
         } else {
             const len = (value?.length ?? 0) ?? (value?.toString()?.length ?? 0);
             return len >= (validValue ?? 0);
@@ -131,7 +130,7 @@ const funcArguments: AR.funcArguments = {
      * Validate value type
      *
      * @param value - value to validate
-     * @param func - Objeto primitivo correspondiente al tipo de dato declarado para validación
+     * @param func - Primitive object corresponding to the data type declared for validation
      * @param scheme - scheme data
      */
      type: (value, func, scheme) => {
@@ -157,14 +156,13 @@ const funcArguments: AR.funcArguments = {
      */
     validStrict: (strict, type, key, value, scheme) => {
         const valid = validate.get(type);
-        const objMessage = scheme.message ?? {};
-        const message = objMessage ?? objMessage[key];
+        const message = scheme.message;
 
         if (strict && valid) {
             !valid(value) ? exception({
                 message: MessageValidationErrors,
                 errors: [{
-                    [key]: [message ?? messageArgument.strict({key, type})]
+                    [key]: [ejectMessage('strict', {type, key, message})]
                 }]
             }, 400): true
         }
@@ -172,7 +170,7 @@ const funcArguments: AR.funcArguments = {
 }
 
 /**
- * Validar argumentos según su key de validación
+ * Validate arguments based on their validation key
  *
  * @param key - 'required'
  * @param props - schema data
@@ -184,7 +182,7 @@ function validArguments(key: string, props: any): boolean {
         case 'max': return funcArguments.max(props);
         case 'validation': return funcArguments.validation(props);
         default:
-            throw 'non-specific validation function'
+            throw 'non-specific validation function';
     }
 }
 
@@ -202,9 +200,11 @@ async function validType ({value, key, scheme}: AR.compareProps): Promise<any> {
     const type: VA.FuncTypeValid | undefined = scheme['type'];
     const strict: boolean | undefined = scheme['strict'];
     const required: boolean | undefined = scheme['required'];
-
+    const typeExtractName = (type: any) => {
+        return type.name
+    }
     if (type) {
-        const name = type.name;
+        const name = typeExtractName(type);
         required && value ? funcArguments.validStrict(
             strict, name, key, value, scheme
             ): null;
@@ -341,7 +341,7 @@ function getValue(reqBody: { [index: string | number]: any }, scheme: VA.scheme,
  * @param schemes - schemes of validation `{ email: {type: Sandwich.String, strict: true} }`
  */
 export async function argument(
-    valueOf: boolean, reqBody: object, schemes?: VA.schemes
+    valueOf: boolean = true, reqBody: object =  {}, schemes?: VA.schemes
 ): Promise<AR.argumentProps> {
     const resp = {};
     const body = {};

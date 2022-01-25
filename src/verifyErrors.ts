@@ -1,27 +1,8 @@
 import {ResponseVerifyErrors, ErrorStatus} from "../functions/verifyErrors";
+import {isBrowser} from "./help";
 
 export const MessageValidationErrors = "args_validation_errors";
-export const MessageValidationSuccessful = "args_validation_successful"
-
-/**
- * Generate exception
- * 
- * @param response - data response
- */
-export function error(response: ResponseVerifyErrors): ResponseVerifyErrors {
-    throw response;
-}
-
-/**
- * Raise exception for errors handled from a server
- * 
- * @param response - data response
- * @param code - status code
- */
- export function responseServerError(response: ResponseVerifyErrors, code: number): ResponseVerifyErrors {
-    const {message, errors} = response;
-    throw {"statusCode": code, "message": message, errors};
-}
+export const MessageValidationSuccessful = "args_validation_successful";
 
 /**
  * Throw exception, the response returns the key status code depending on the ecosystem where the deployment is running
@@ -29,9 +10,10 @@ export function error(response: ResponseVerifyErrors): ResponseVerifyErrors {
  * @param response - data response
  * @param code - status code
  */
-export function exception(response: ResponseVerifyErrors, code: number) {
-    typeof window !== 'undefined'
-    && ({}).toString.call(window) === '[object Window]' ? error(response) : responseServerError(response, code);
+export function exception(response: ResponseVerifyErrors, statusCode?: number) {
+    const {message, errors} = response;
+    if(statusCode && !isBrowser()) throw {statusCode, message, errors};
+    throw {message, errors};
 }
 
 /**

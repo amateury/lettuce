@@ -10,7 +10,7 @@ export const isBrowser: () => boolean = () => typeof window !== 'undefined'
  * Identify if it is running in a nodejs
  */
 export const isNode: () => boolean = () => typeof global !== "undefined"
-    && ({}).toString.call(global) === '[object global]';
+    && ({}).toString.call(global) === '[object Object]';
 
 /**
  * validate if it is an array
@@ -64,3 +64,7 @@ validate.set('Object', isObject);
 validate.set('Browser', isBrowser);
 validate.set('Node', isNode);
 
+
+// export const getOne = (key: string | number, obj: {[index: string | number]: any}) => {
+//     return obj[key];
+// }

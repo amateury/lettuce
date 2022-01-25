@@ -10,7 +10,7 @@ const userScheme = {
     lastName: "Brayan Salgado"
 }
 
-const validator = new Lettuce({
+const schemes = {
     id: {
         type: Types.String, required: true, value: 'dd89918b-6638-4f18-ad22-c80b416ac89e', strict: true
     },
@@ -18,7 +18,9 @@ const validator = new Lettuce({
     password: {type: Types.String, required: true, strict: true, min: 8},
     confirmPassword: {type: Types.String, required: true, strict: true, min: 8},
     lastName: {type: Types.String, required: true, strict: true, min: 2, max: 50}
-});
+}
+
+const validator = new Lettuce(schemes);
 
 test('Validations schema success', async function () {
 
@@ -30,6 +32,11 @@ test('Validations schema success', async function () {
         expect(resp0.args.email.valueOf()).toBe(userScheme.email);
         expect(resp0.args.password.valueOf()).toBe(userScheme.password);
         expect(resp0.message).toBe("args_validation_successful");
+
+        validator.reset()
+
+        validator.schemes = schemes;
+        validator.values = userScheme;
 
         validator.valueOf = false;
 

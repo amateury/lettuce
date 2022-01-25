@@ -1,8 +1,12 @@
 import {messageType} from './arguments';
 import Lettuce from "../src";
+
+
 export type validationFun = (value: any) => any;
 
-type FuncTypeValid = (props: any) => void;
+type FuncTypeValidCustom = ((value: any, scheme: any) => any);
+
+type FuncTypeValid = ((props: any) => void) | FuncTypeValidCustom;
 
 /**
  * TypeValid
@@ -89,7 +93,7 @@ export class LettuceInterface extends TypeValid {
     /**
      * 
      */
-    readonly schemes: schemes;
+    readonly schemes: schemes | undefined;
     /**
      * Creates an instance of Sandwiches.
      * @param schemes - schemes of validations
