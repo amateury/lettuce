@@ -62,9 +62,9 @@ The Lettuce class parserSchemes method executes the data validation, in case it 
 
 ```json
 {
-  message: 'args_validation_successful',
-  errors: [],
-  statusCode: 200,
+  "message": "args_validation_successful",
+  "errors": [],
+  "statusCode": 200,
 }
 ```
 
@@ -76,13 +76,11 @@ Otherwise it will raise an exception:
 
 ```json
 {
-  message: 'args_validation_errors',
-  errors: [
-    password: [
-      'maximum_characters_8'
-    ]
+  "message": "args_validation_errors",
+  "errors": [
+    {"password": ["maximum_characters_8"]}
   ],
-  statusCode: 400,
+  "statusCode": 400,
 }
 ```
 
