@@ -5,30 +5,64 @@ import {validate} from "./help";
 import {exception, MessageValidationErrors} from './verifyErrors'
 
 /**
- *
  * Response messages due to validation failure
+ * 
  */
 const messageArgument: AR.MessageArgument = {
-    validation: () => ({
-        message: `validation_custom`
-    }),
-    required: () => ({
-        message: "required_field"
-    }),
-    min: (props) => ({
-        message: "minimum_characters",
-        value: props.validValue
-    }),
-    max: (props) => ({
-        message: "maximum_characters",
-        value: props.validValue
-    }),
-    strict: (props) => ({
-        message: "{key}_expected_data_type_{type}"
-            .replace('{key}', props.key)
-            .replace('{type}', props.type)
-            .toLowerCase()
-    })
+    /**
+     * Validation
+     * 
+     * @returns string
+     */
+    validation: () => "validation_custom",
+    /**
+     * Required
+     * 
+     * @returns string
+     */
+    required: () => "required_field",
+    /**
+     * Min
+     * 
+     * @param props -
+     * ```json
+     * {
+     *  validValue: 8
+     * }
+     * ```
+     * @returns string
+     */
+    min: (props) => "minimum_characters_{value}"
+    .replace('{value}', props.validValue),
+    /**
+     * Max
+     * 
+     * @param props -
+     * ```json
+     * {
+     *  validValue: 8
+     * }
+     * ```
+     * @returns string
+     */
+    max: (props) => "maximum_characters_{value}"
+    .replace('{value}', props.validValue),
+    /**
+     * Strict
+     * 
+     * @param props -
+     * ```json
+     * {
+     *  key: 'mobil',
+     *  type: 'string'
+     * }
+     * ```
+     * @returns string
+     */
+    strict: (props) => "{key}_expected_data_type_{type}"
+    .replace('{key}', props.key)
+    .replace('{type}', props.type)
+    .toLowerCase()
 }
 
 /**
