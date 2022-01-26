@@ -1,6 +1,6 @@
 {
   "name": "@amateury/lettuce",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "It is a library that allows a rigorous validation of the data, according to a specific pattern (a scheme).",
   "main": "build/index.js",
   "module": "build/index.es.mjs",
