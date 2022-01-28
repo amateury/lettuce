@@ -31,7 +31,7 @@ export async function verifyErrors(
     }
 
     if (errors.length) {
-        response.errors = errors;
+        response.errors = Object.assign({}, ...errors);
         response.message = MessageValidationErrors;
         exception(response, 400);
     } else {
