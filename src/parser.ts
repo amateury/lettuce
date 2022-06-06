@@ -1,6 +1,7 @@
-import { validate } from "./help";
+import { validate, isBoolean } from "./help";
 
 type TTarget = string | number;
+type TRegex = RegExp;
 
 export interface IScheme {
   target: TTarget;
@@ -10,7 +11,7 @@ export interface IScheme {
   max?: number;
   value?: ((value: any) => any) | any;
   strict?: boolean;
-  validation?: any;
+  regex?: TRegex;
   message?: any;
 }
 
@@ -48,7 +49,7 @@ const isRequired = async (
   required: boolean | undefined,
   val: TValue
 ): Promise<void> => {
-  if (required && !val) error("required");
+  if (required && !val && !isBoolean(val)) error("required");
 };
 
 /**
@@ -130,17 +131,8 @@ const max = async (val: TValue, max: number, typeName: string) => {
   return validMin;
 };
 
-/**
- * Add the default value, set the value property, the value property can be a
- * function and will be interpreted as a callback
- * @param scheme - Scheme of validation
- * @param val - Value of validation
- */
-const valueDefault = async (scheme: IScheme, val: TValue): Promise<TValue> => {
-  if (scheme.value && scheme.value instanceof Function)
-    return await scheme.value(val);
-  if (scheme.value !== undefined) return scheme.value;
-  return val;
+const regexValid = async (val: TValue, reg: TRegex) => {
+  if (!reg.test(val)) error("regex");
 };
 
 /**
@@ -154,9 +146,23 @@ async function complementaryValidation(
 ): Promise<TValue> {
   if (scheme.min) await min(val, scheme.min, scheme.type.name);
   if (scheme.max) await max(val, scheme.max, scheme.type.name);
+  if (scheme.regex) await regexValid(val, scheme.regex);
 
   return val;
 }
+
+/**
+ * Add the default value, set the value property, the value property can be a
+ * function and will be interpreted as a callback
+ * @param scheme - Scheme of validation
+ * @param val - Value of validation
+ */
+const valueDefault = async (scheme: IScheme, val: TValue): Promise<TValue> => {
+  if (scheme.value && scheme.value instanceof Function)
+    return await scheme.value(val);
+  if (scheme.value !== undefined && !val) return scheme.value;
+  return val;
+};
 
 type TRValidScheme = [TErrorVal[], TValue];
 

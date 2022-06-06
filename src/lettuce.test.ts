@@ -1,23 +1,23 @@
 import Lettuce from "./lettuce";
 import assert = require("assert");
 
-class Bool {
-  value: boolean;
-  constructor(value: boolean) {
-    this.value = Boolean(value);
-  }
-  static async __validate__(elm: any) {
-    return typeof elm === "boolean";
-  }
+function Bool(this: any, value: any) {
+  this.value = !!value;
 }
 
-function value(val: any) {
-  console.log(val);
-  return val;
-}
+Bool.prototype.__validate__ = (elm: any) => {
+  console.log(this);
+  return typeof elm === "boolean";
+};
 
 const scheme = [
-  { target: "email", type: String, required: true, strict: false, value },
+  {
+    target: "email",
+    type: String,
+    required: true,
+    strict: true,
+    regex: /^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+  },
   {
     target: "name",
     type: String,
@@ -25,28 +25,30 @@ const scheme = [
     strict: false,
     min: 2,
     max: 50,
-    value: null,
   },
-  { target: "password", type: String, required: true, strict: false, min: 8 },
   { target: "phone", type: Number, required: true, strict: false, min: 20 },
+  { target: "password", type: String, required: true, strict: false, min: 8 },
+  { target: "is_admin", type: Boolean, required: true, strict: true },
 ];
 
 const lettuce = new Lettuce(scheme);
 
-describe("Array", function () {
-  describe("Scheme Data", function () {
-    it("Validate schema length", function () {
-      assert.equal(lettuce?.schemes.length, 4);
-    });
-    it("Parser schemes", async function () {
-      const values = {
-        email: "ds@lettuce.com",
-        phone: 50,
-        password: "dsdsdsfaw2332",
-      };
-      const resp = await lettuce.parser(values);
-      console.log(resp);
-      assert.equal(lettuce?.schemes.length, 4);
-    });
+describe("Validate schema", function () {
+  it("Validate schema length", function () {
+    assert.strictEqual(lettuce?.schemes.length, 5);
+  });
+  it("Parser schemes", async function () {
+    const values = {
+      email: "ds@lettuce.com",
+      phone: 51,
+      name: "Bryant",
+      password: "$b4feiG*LNzq",
+      is_admin: "true",
+    };
+    const resp = await lettuce.parser(values);
+    assert.equal(typeof resp.email, "string");
+    assert.equal(typeof resp.phone, "number");
+    assert.equal(typeof resp.name, "string");
+    assert.equal(typeof resp.password, "string");
   });
 });

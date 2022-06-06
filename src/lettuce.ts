@@ -1,3 +1,4 @@
+export * from "./parser";
 import * as parser from "./parser";
 
 interface ILettuce {
