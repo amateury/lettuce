@@ -119,8 +119,8 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
       try {
         if (nameFuncType.toString().toLocaleLowerCase() === typeof val)
           return await validateValueType(scheme, val, typeOrPick, undefined);
+        // eslint-disable-next-line no-empty
       } finally {
-        console.log(nameFuncType);
       }
     } else {
       if (val === typeOrPick) return val;
@@ -149,7 +149,6 @@ const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
  */
 const min = async (val: TValue, min: number, typeName: string) => {
   let validMin = null;
-  console.log(val, typeName)
   if (val.length) {
     validMin = val.length >= min;
   } else if (typeName === "Number" || typeName === "BigInt") {

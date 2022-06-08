@@ -1,4 +1,4 @@
-import Lettuce from "./lettuce";
+import Lettuce from "../build";
 import assert = require("assert");
 
 enum Status {
@@ -44,7 +44,6 @@ describe("Validate schema", function () {
       status: "active",
     };
     const resp = await lettuce.parser(values);
-    console.log(resp)
     assert.equal(typeof resp.email, "string");
     assert.equal(typeof resp.phone, "string");
     assert.equal(typeof resp.name, "string");

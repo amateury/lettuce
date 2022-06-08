@@ -1,7 +1,6 @@
-import Lettuce, { IScheme, TValues } from "./lettuce";
+import Lettuce, { IScheme, TValues } from "../build";
 import { expect } from "chai";
 import assert = require("assert");
-
 
 type TErrorValid = {
   valid: IScheme;

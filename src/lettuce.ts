@@ -1,4 +1,3 @@
-export * from "./parser";
 import * as parser from "./parser";
 
 interface ILettuce {
@@ -6,7 +5,7 @@ interface ILettuce {
   values?: parser.TValues;
 }
 
-export default class Lettuce implements ILettuce {
+class Lettuce implements ILettuce {
   /**
    * Object type property. List of validation schemes.
    * @defaultValue object
@@ -32,3 +31,5 @@ export default class Lettuce implements ILettuce {
     return parser.parserScheme(this.schemes, this.values);
   }
 }
+
+export default Lettuce;
