@@ -2,10 +2,11 @@ import { validate, isBoolean } from "./help";
 
 type TTarget = string | number;
 type TRegex = RegExp;
+type TType = any;
 
 export interface IScheme {
   target: TTarget;
-  type: any;
+  type: TType;
   required?: boolean;
   min?: number;
   max?: number;
@@ -53,26 +54,41 @@ const isRequired = async (
 };
 
 /**
- * Formats the target value to the specified type
+ * In this function, the custom data type is validated through
+ * the static method __validate__.
+ * @param val - Value of validation
+ * @param type - Data type
+ */
+const customValidateValue = async (val: TValue, type: TType) => {
+  try {
+    const valid = await type.__validate__(val);
+    if (!valid) error("type");
+  } catch (e) {
+    console.error(e);
+    if (e !== "type") error("No validation custom format found");
+    error(e);
+  }
+};
+/**
+ * Validate data type
  * @param scheme - Type to validation
  * @param val - Value of validation
+ * @param type - Data type
+ * @param strict - It is a boolean to know if the data will be
+ * strictly validated
  */
-const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
-  const type = scheme.type; // Type to validation
-  const strict = scheme.strict; //Validation strict
+const validateValueType = async (
+  scheme: IScheme,
+  val: TValue,
+  type: TType,
+  strict: boolean | undefined
+): Promise<TValue> => {
   if (strict) {
     const validateStrict = validate.get(type.name);
     if (validateStrict) {
       if (!validateStrict(val)) error("type");
     } else {
-      try {
-        const valid = await type.__validate__(val);
-        if (!valid) error("type");
-      } catch (e) {
-        console.error(e);
-        if (e !== "type") error("No validation custom format found");
-        error(e);
-      }
+      await customValidateValue(val, type);
     }
   }
 
@@ -82,18 +98,58 @@ const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
   } else {
     formatVal = val ? type(val) : val;
   }
-  return val ? await complementaryValidation(scheme, formatVal) : val;
+  return val
+    ? await complementaryValidation(scheme, formatVal, type.name)
+    : val;
+};
+
+/**
+ * Validate data type
+ * @param scheme - Type to validation
+ * @param val - Value of validation
+ * @param type - Data type
+ */
+const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
+  const keys = Object.keys(type);
+  let len = keys.length + 1;
+  while (--len) {
+    const typeOrPick = type[keys[keys.length - len]];
+    if (typeOrPick instanceof Function) {
+      const nameFuncType = typeOrPick.name;
+      try {
+        if (nameFuncType.toString().toLocaleLowerCase() === typeof val)
+          return await validateValueType(scheme, val, typeOrPick, undefined);
+      } finally {
+        console.log(nameFuncType);
+      }
+    } else {
+      if (val === typeOrPick) return val;
+    }
+    if (len === 1) error("pick");
+  }
+};
+
+/**
+ * Formats the target value to the specified type
+ * @param scheme - Type to validation
+ * @param val - Value of validation
+ */
+const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
+  const type = scheme.type; // Type to validation
+  const strict = scheme.strict; //Validation strict
+  if (typeof type === "object") return await valuePick(scheme, val, type);
+  return await validateValueType(scheme, val, type, strict);
 };
 
 /**
  * Evaluate minimum value
  * @param val - Value of validation
  * @param min - Value of minimum (number)
- * @param typeName -
+ * @param typeName - Name function type
  */
 const min = async (val: TValue, min: number, typeName: string) => {
   let validMin = null;
-
+  console.log(val, typeName)
   if (val.length) {
     validMin = val.length >= min;
   } else if (typeName === "Number" || typeName === "BigInt") {
@@ -139,13 +195,15 @@ const regexValid = async (val: TValue, reg: TRegex) => {
  * Complementary validation: minimum value, maximum value
  * @param scheme - Scheme of validation
  * @param val - Value of validation
+ * @param typeName - Name function type
  */
 async function complementaryValidation(
   scheme: IScheme,
-  val: TValue
+  val: TValue,
+  typeName: string
 ): Promise<TValue> {
-  if (scheme.min) await min(val, scheme.min, scheme.type.name);
-  if (scheme.max) await max(val, scheme.max, scheme.type.name);
+  if (scheme.min) await min(val, scheme.min, typeName);
+  if (scheme.max) await max(val, scheme.max, typeName);
   if (scheme.regex) await regexValid(val, scheme.regex);
 
   return val;
