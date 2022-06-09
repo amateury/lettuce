@@ -1,4 +1,4 @@
-import Lettuce, { IScheme, TValues } from "../build";
+import Lettuce, { IScheme, TValues } from "./index";
 import { expect } from "chai";
 import assert = require("assert");
 

@@ -16,19 +16,11 @@ return /******/ (() => { // webpackBootstrap
 /*!*********************!*\
   !*** ./src/help.ts ***!
   \*********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "isArray": () => (/* binding */ isArray),
-/* harmony export */   "isBoolean": () => (/* binding */ isBoolean),
-/* harmony export */   "isBrowser": () => (/* binding */ isBrowser),
-/* harmony export */   "isNode": () => (/* binding */ isNode),
-/* harmony export */   "isNumber": () => (/* binding */ isNumber),
-/* harmony export */   "isObject": () => (/* binding */ isObject),
-/* harmony export */   "isString": () => (/* binding */ isString),
-/* harmony export */   "validate": () => (/* binding */ validate)
-/* harmony export */ });
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.validate = exports.isBoolean = exports.isNumber = exports.isString = exports.isObject = exports.isArray = exports.isBrowser = exports.isNode = void 0;
 /**
  * Identify if it is running in a nodejs
  */
@@ -36,10 +28,12 @@ var isNode = function () {
     return typeof __webpack_require__.g !== "undefined" &&
         {}.toString.call(__webpack_require__.g) === "[object Object]";
 };
+exports.isNode = isNode;
 /**
  * Identify if it is running in a browser
  */
-var isBrowser = function () { return !isNode(); };
+var isBrowser = function () { return !(0, exports.isNode)(); };
+exports.isBrowser = isBrowser;
 /**
  * validate if it is an array
  *
@@ -49,6 +43,7 @@ var isBrowser = function () { return !isNode(); };
 function isArray(elm) {
     return Array.isArray(elm);
 }
+exports.isArray = isArray;
 /**
  * validate if it is an objet
  *
@@ -58,6 +53,7 @@ function isArray(elm) {
 function isObject(elm) {
     return elm instanceof Object;
 }
+exports.isObject = isObject;
 /**
  * validate if it is an string
  *
@@ -67,6 +63,7 @@ function isObject(elm) {
 function isString(elm) {
     return typeof elm === "string";
 }
+exports.isString = isString;
 /**
  * validate if it is a number
  *
@@ -76,6 +73,7 @@ function isString(elm) {
 function isNumber(elm) {
     return typeof elm === "number";
 }
+exports.isNumber = isNumber;
 /**
  * validate if it is a number
  *
@@ -85,18 +83,51 @@ function isNumber(elm) {
 function isBoolean(elm) {
     return typeof elm === "boolean";
 }
+exports.isBoolean = isBoolean;
 /**
  * Functions validations (isArray, isString)
  *
  */
-var validate = new Map();
-validate.set("Array", isArray);
-validate.set("String", isString);
-validate.set("Number", isNumber);
-validate.set("Object", isObject);
-validate.set("Browser", isBrowser);
-validate.set("Node", isNode);
-validate.set("Boolean", isBoolean);
+exports.validate = new Map();
+exports.validate.set("Array", isArray);
+exports.validate.set("String", isString);
+exports.validate.set("Number", isNumber);
+exports.validate.set("Object", isObject);
+exports.validate.set("Browser", exports.isBrowser);
+exports.validate.set("Node", exports.isNode);
+exports.validate.set("Boolean", isBoolean);
+
+
+/***/ }),
+
+/***/ "./src/index.ts":
+/*!**********************!*\
+  !*** ./src/index.ts ***!
+  \**********************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./parser */ "./src/parser.ts"), exports);
+var lettuce_1 = __importDefault(__webpack_require__(/*! ./lettuce */ "./src/lettuce.ts"));
+exports["default"] = lettuce_1.default;
 
 
 /***/ }),
@@ -105,14 +136,33 @@ validate.set("Boolean", isBoolean);
 /*!************************!*\
   !*** ./src/lettuce.ts ***!
   \************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _parser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parser */ "./src/parser.ts");
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -121,7 +171,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (undefined && undefined.__generator) || function (thisArg, body) {
+var __generator = (this && this.__generator) || function (thisArg, body) {
     var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
     return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
@@ -148,7 +198,8 @@ var __generator = (undefined && undefined.__generator) || function (thisArg, bod
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var parser = __importStar(__webpack_require__(/*! ./parser */ "./src/parser.ts"));
 var Lettuce = /** @class */ (function () {
     /**
      * Creates an instance of Lettuce.
@@ -163,13 +214,13 @@ var Lettuce = /** @class */ (function () {
             return __generator(this, function (_a) {
                 if (values)
                     this.values = values;
-                return [2 /*return*/, _parser__WEBPACK_IMPORTED_MODULE_0__.parserScheme(this.schemes, this.values)];
+                return [2 /*return*/, parser.parserScheme(this.schemes, this.values)];
             });
         });
     };
     return Lettuce;
 }());
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Lettuce);
+exports["default"] = Lettuce;
 
 
 /***/ }),
@@ -178,14 +229,10 @@ var Lettuce = /** @class */ (function () {
 /*!***********************!*\
   !*** ./src/parser.ts ***!
   \***********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "parserScheme": () => (/* binding */ parserScheme)
-/* harmony export */ });
-/* harmony import */ var _help__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./help */ "./src/help.ts");
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -194,7 +241,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (undefined && undefined.__generator) || function (thisArg, body) {
+var __generator = (this && this.__generator) || function (thisArg, body) {
     var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
     return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
@@ -221,7 +268,7 @@ var __generator = (undefined && undefined.__generator) || function (thisArg, bod
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
             if (!ar) ar = Array.prototype.slice.call(from, 0, i);
@@ -230,7 +277,9 @@ var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parserScheme = void 0;
+var help_1 = __webpack_require__(/*! ./help */ "./src/help.ts");
 /**
  * Run a bug
  * @param e - Error
@@ -245,7 +294,7 @@ var error = function (e) {
  */
 var isRequired = function (required, val) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        if (required && !val && !(0,_help__WEBPACK_IMPORTED_MODULE_0__.isBoolean)(val))
+        if (required && !val && !(0, help_1.isBoolean)(val))
             error("required");
         return [2 /*return*/];
     });
@@ -293,7 +342,7 @@ var validateValueType = function (scheme, val, type, strict) { return __awaiter(
         switch (_b.label) {
             case 0:
                 if (!strict) return [3 /*break*/, 3];
-                validateStrict = _help__WEBPACK_IMPORTED_MODULE_0__.validate.get(type.name);
+                validateStrict = help_1.validate.get(type.name);
                 if (!validateStrict) return [3 /*break*/, 1];
                 if (!validateStrict(val))
                     error("type");
@@ -619,6 +668,7 @@ function parserScheme(schemes, values) {
         });
     });
 }
+exports.parserScheme = parserScheme;
 
 
 /***/ })
@@ -643,25 +693,13 @@ function parserScheme(schemes, values) {
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/global */
 /******/ 	(() => {
 /******/ 		__webpack_require__.g = (function() {
@@ -674,42 +712,13 @@ function parserScheme(schemes, values) {
 /******/ 		})();
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-/*!**********************!*\
-  !*** ./src/index.ts ***!
-  \**********************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
-/* harmony export */   "parserScheme": () => (/* reexport safe */ _parser__WEBPACK_IMPORTED_MODULE_0__.parserScheme)
-/* harmony export */ });
-/* harmony import */ var _parser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parser */ "./src/parser.ts");
-/* harmony import */ var _lettuce__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./lettuce */ "./src/lettuce.ts");
-
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_lettuce__WEBPACK_IMPORTED_MODULE_1__["default"]);
-
-})();
-
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.ts");
+/******/ 	
 /******/ 	return __webpack_exports__;
 /******/ })()
 ;

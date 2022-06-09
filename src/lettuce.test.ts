@@ -1,4 +1,4 @@
-import Lettuce from "../build";
+import Lettuce from "./index";
 import assert = require("assert");
 
 enum Status {
