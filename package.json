@@ -7,11 +7,13 @@
   "types": "build/index.d.ts",
   "scripts": {
     "test": "jest",
+    "test-coverage": "jest --coverage --detectOpenHandles && coveralls < coverage/lcov.info",
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --fix",
     "build": "npx webpack --config webpack.config.js --mode=production",
     "build:dev": "npx webpack --config webpack.config.js --mode=development",
-    "watch": "node_modules/.bin/webpack --config webpack.config.js --mode=development -w"
+    "watch": "node_modules/.bin/webpack --config webpack.config.js --mode=development -w",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
