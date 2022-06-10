@@ -1,5 +1,4 @@
 import Lettuce from "./index";
-import assert = require("assert");
 
 enum Status {
   active = "active",
@@ -32,7 +31,7 @@ const lettuce = new Lettuce(scheme);
 
 describe("Validate schema", function () {
   it("Validate schema length", function () {
-    assert.strictEqual(lettuce?.schemes.length, 6);
+    expect(lettuce?.schemes.length).toBe(6);
   });
   it("Parser schemes", async function () {
     const values = {
@@ -44,9 +43,11 @@ describe("Validate schema", function () {
       status: "active",
     };
     const resp = await lettuce.parser(values);
-    assert.equal(typeof resp.email, "string");
-    assert.equal(typeof resp.phone, "string");
-    assert.equal(typeof resp.name, "string");
-    assert.equal(typeof resp.password, "string");
+    expect(typeof resp.email).toBe("string");
+    expect(typeof resp.phone).toBe("string");
+    expect(typeof resp.name).toBe("string");
+    expect(typeof resp.password).toBe("string");
+    expect(typeof resp.status).toEqual("string");
+    expect(resp).toEqual(values);
   });
 });

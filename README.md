@@ -56,7 +56,7 @@ lettuce.parser(values).then((data) => {
   console.log(e); // Error response
 });
 ```
-`Example 1`
+#### `Example 1`
 
 The <-parser-> method executes the data validation, if it is successful, the response message is the data sent to validation, otherwise it generates an exception:
 
@@ -69,7 +69,7 @@ The <-parser-> method executes the data validation, if it is successful, the res
   "password": "$b4fei"
 }
 ```
-`Example 1.1`
+#### `Example 1.1`
 
 ***Response error***
 
@@ -86,7 +86,7 @@ In the event that we send, we request that the password contain a minimum of 8 c
   }
 ]
 ```
-`Example 1.1`
+#### `Example 1.1`
 
 ### Schemes
 A schema represents a validation element, for example:

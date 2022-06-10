@@ -1,6 +1,4 @@
 import Lettuce, { IScheme, TValues } from "./index";
-import { expect } from "chai";
-import assert = require("assert");
 
 type TErrorValid = {
   valid: IScheme;
@@ -39,6 +37,11 @@ describe("Validate schema error", function () {
       targetValid: "max",
       values: { name: "Lettuce" },
     },
+    {
+      valid: { target: "status", type: ["active", "inactive"] },
+      targetValid: "type",
+      values: { status: "" },
+    },
   ];
 
   errorValid.forEach(({ valid, targetValid, values }) => {
@@ -49,16 +52,15 @@ describe("Validate schema error", function () {
         const fn = function () {
           throw "Validation was successful: this for the present case is an error is an error";
         };
-        expect(fn).to.throw(Error);
+        fn();
       } catch (e: any) {
-        if (!e.length) {
+        if (!(e instanceof Array)) {
           throw e;
         } else {
-          assert.strictEqual(e.length, 1);
-          if (targetValid === "required")
-            assert.strictEqual(e[0].value, undefined);
-          assert.equal(e[0].target, valid.target);
-          assert.strictEqual(e[0].error.length, 1);
+          expect(e.length).toBe(1);
+          if (targetValid === "required") expect(e[0].value).toBe(undefined);
+          expect(e[0].target).toBe(valid.target);
+          expect(e[0].error.length).toBe(1);
         }
       }
     });
