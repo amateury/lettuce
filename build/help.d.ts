@@ -1,13 +1,5 @@
 export declare type TIsValidate = (elm: any) => boolean;
 /**
- * Identify if it is running in a nodejs
- */
-export declare const isNode: () => boolean;
-/**
- * Identify if it is running in a browser
- */
-export declare const isBrowser: () => boolean;
-/**
  * validate if it is an array
  *
  * @param elm - element validation

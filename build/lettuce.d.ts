@@ -17,7 +17,7 @@ declare class Lettuce implements ILettuce {
     /**
      * Creates an instance of Lettuce.
      */
-    constructor(schemas: parser.IScheme[] | null, values?: parser.TValues);
+    constructor(schemas: parser.IScheme[], values?: parser.TValues);
     parser(values?: parser.TValues): Promise<any>;
 }
 export default Lettuce;

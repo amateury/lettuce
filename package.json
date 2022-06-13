@@ -14,7 +14,8 @@
     "build": "npx webpack --config webpack.config.js --mode=production",
     "build:dev": "npx webpack --config webpack.config.js --mode=development",
     "watch": "node_modules/.bin/webpack --config webpack.config.js --mode=development -w",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -52,6 +53,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-tsdoc": "^0.2.16",
+    "husky": "^8.0.1",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
     "prettier": "^2.6.2",
