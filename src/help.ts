@@ -1,18 +1,6 @@
 export type TIsValidate = (elm: any) => boolean;
 
 /**
- * Identify if it is running in a nodejs
- */
-export const isNode: () => boolean = () =>
-  typeof global !== "undefined" &&
-  {}.toString.call(global) === "[object Object]";
-
-/**
- * Identify if it is running in a browser
- */
-export const isBrowser: () => boolean = () => !isNode();
-
-/**
  * validate if it is an array
  *
  * @param elm - element validation
@@ -71,6 +59,4 @@ validate.set("Array", isArray);
 validate.set("String", isString);
 validate.set("Number", isNumber);
 validate.set("Object", isObject);
-validate.set("Browser", isBrowser);
-validate.set("Node", isNode);
 validate.set("Boolean", isBoolean);

@@ -62,11 +62,13 @@ const isRequired = async (
 const customValidateValue = async (val: TValue, type: TType) => {
   try {
     const valid = await type.__validate__(val);
-    if (!valid) error("type");
+    /* istanbul ignore else */
+    if (!valid) {
+      error("type");
+    }
   } catch (e) {
-    console.error(e);
-    if (e !== "type") error("No validation custom format found");
-    error(e);
+    if (e === "type") error(e);
+    error(`No validation custom format found: ${e}`);
   }
 };
 /**
@@ -111,14 +113,17 @@ const validateValueType = async (
  */
 const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
   const keys = Object.keys(type);
-  let len = keys.length + 1;
+  let len: number = keys.length + 1;
   while (--len) {
     const typeOrPick = type[keys[keys.length - len]];
     if (typeOrPick instanceof Function) {
       const nameFuncType = typeOrPick.name;
       try {
-        if (nameFuncType.toString().toLocaleLowerCase() === typeof val)
+        const nameFuncTypeLCase = nameFuncType.toString().toLocaleLowerCase();
+        /* istanbul ignore else */
+        if (nameFuncTypeLCase === typeof val) {
           return await validateValueType(scheme, val, typeOrPick, undefined);
+        }
         // eslint-disable-next-line no-empty
       } finally {
       }
@@ -159,7 +164,6 @@ const min = async (val: TValue, min: number, typeName: string) => {
     error(
       `it is not possible to evaluate the minimum value for the type: ${typeof val}`
     );
-
   return validMin;
 };
 
@@ -180,7 +184,7 @@ const max = async (val: TValue, max: number, typeName: string) => {
   if (validMin !== null && !validMin) error("max");
   if (!validMin)
     error(
-      `it is not possible to evaluate the maximum value for the type:: ${typeof val}`
+      `it is not possible to evaluate the maximum value for the type: ${typeof val}`
     );
 
   return validMin;
@@ -217,8 +221,7 @@ async function complementaryValidation(
 const valueDefault = async (scheme: IScheme, val: TValue): Promise<TValue> => {
   if (scheme.value && scheme.value instanceof Function)
     return await scheme.value(val);
-  if (scheme.value !== undefined && !val) return scheme.value;
-  return val;
+  return scheme.value !== undefined && !val ? scheme.value : val;
 };
 
 type TRValidScheme = [TErrorVal[], TValue];
@@ -235,9 +238,7 @@ async function validScheme(
   const errors: TErrorVal[] = [];
   const strict = scheme.strict;
 
-  await isRequired(scheme.required, val).catch((e: any) =>
-    strict ? error(e) : errors.push(e)
-  );
+  await isRequired(scheme.required, val).catch((e: any) => error(e));
 
   return await valueType(scheme, val)
     .catch((e: any) => {

@@ -21,8 +21,8 @@ class Lettuce implements ILettuce {
   /**
    * Creates an instance of Lettuce.
    */
-  constructor(schemas: parser.IScheme[] | null, values?: parser.TValues) {
-    this.schemes = schemas ?? [];
+  constructor(schemas: parser.IScheme[], values?: parser.TValues) {
+    this.schemes = schemas;
     if (values) this.values = values;
   }
 

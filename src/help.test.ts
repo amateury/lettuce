@@ -1,35 +1,24 @@
-import {
-  isArray,
-  isObject,
-  isNumber,
-  isString,
-  isBrowser,
-  isNode,
-} from "./help";
+import { isArray, isObject, isNumber, isString } from "./help";
+import { strictEqual } from "assert";
 
 describe("Function help", function () {
-  test("Validate element array", async () => {
-    expect(isArray([1, 3])).toBe(true);
-    expect(isArray(123)).toBe(false);
+  it("Validate element array", async () => {
+    strictEqual(isArray([1, 3]), true);
+    strictEqual(isArray(123), false);
   });
 
-  test("Validate element object", async () => {
-    expect(isObject({})).toBe(true);
-    expect(isObject(undefined)).toBe(false);
+  it("Validate element object", async () => {
+    strictEqual(isObject({}), true);
+    strictEqual(isObject(undefined), false);
   });
 
-  test("Validate element number", async () => {
-    expect(isNumber(1)).toBe(true);
-    expect(isNumber([])).toBe(false);
+  it("Validate element number", async () => {
+    strictEqual(isNumber(1), true);
+    strictEqual(isNumber([]), false);
   });
 
-  test("Validate element string", async () => {
-    expect(isString("string")).toBe(true);
-    expect(isString([])).toBe(false);
-  });
-
-  test("Validate browser-node", async () => {
-    expect(isBrowser()).toBe(false);
-    expect(isNode()).toBe(true);
+  it("Validate element string", async () => {
+    strictEqual(isString("string"), true);
+    strictEqual(isString([]), false);
   });
 });
