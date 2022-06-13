@@ -63,7 +63,7 @@ describe("Validate schema", function () {
     strictEqual(typeof resp.name, "string");
     strictEqual(typeof resp.password, "string");
     strictEqual(typeof resp.status, "string");
-    // values.id = resp.id;
+    values.id = resp.id;
     expect(resp).to.deep.equal(values);
   });
 });
