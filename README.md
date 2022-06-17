@@ -119,19 +119,19 @@ such a schema contains properties, each with its own validation target, for exam
 #### *type:*
 Of all the properties, type is the only one required. The data type is defined with the containers.
 example of javascript primitives:
-```json lines
+```js
 { target: "phone", type: String }
 ```
 It is also possible to define multiple data types, in this case allowing string and null data types
-```json lines
+```js
 { target: "phone", type: [String, null] }
 ```
 For the case of choice we use it in this way
-```json lines
+```js
 { target: "phone", type: ["active", "inactive"] }
 ```
 For a bit more flexibility, it is possible to configure a custom data type
-```ts
+```js
 class MyCustomValidation {
   static __validate__(val: string) {
     return typeof val === "string";
@@ -139,7 +139,7 @@ class MyCustomValidation {
 }
 ```
 And in this way pass MyCustomValidation as the data type to validate
-```json lines
+```js
 { target: "phone", type: MyCustomValidation }
 ```
 #### *strict:*
