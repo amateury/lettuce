@@ -15,7 +15,7 @@ npm i @amateury/lettuce --save
 ### Validator
 
 ```js
-import Lettuce from '@amateury/lettuce';
+import Lettuce from "@amateury/lettuce";
 
 const scheme = [
   {
@@ -98,21 +98,68 @@ A schema represents a validation element, for example:
     strict: false,
     min: 2,
     max: 50,
+    regex: /^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/g
   }
 ```
 such a schema contains properties, each with its own validation target, for example
 
-##### Properties of a schema:
+#### Properties of a schema:
 #
-| property | description                                                                                                                                                                                                                                                                                                             |
-|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| type     | data type (String, Number, Array, Object, Boolean).                                                                                                                                                                                                                                                                     |
-| required | (boolean) true for required, false for not required.                                                                                                                                                                                                                                                                    |
-| min      | (number) determines the minimum value, if it is a string it will validate the number of characters, in the case of a number it will validate its value.                                                                                                                                                                 |
-| max      | (number) determines the maximum value, the same as the min property but pointing to a maximum value.                                                                                                                                                                                                                    |
-| value    | assigns a value, it has to be of the same declared type, it can be a function with a return value: () => uuid; o value: 'developer', when passing a function it receives the original value as a parameter, declared in the values to be validated `(value) =>  value + '_01'`.                                         |                                                                                                                                                                                                                                                                                     |
-| strict   | (Boolean) determines the validation of the data type strictly if it is true, for example if the type is string and the value is a number, it will not pass the validation, but if it is false it will accept the data type as string if possible within the new chain; otherwise it will throw invalid data type error. |
-| regex    | Validate using regular expression                                                                                                                                                                                                                                                                                       ||
+| property | description                                                                                                                                                                                                                                                                     |
+|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| type     | Defines the type of data to validate (String, Number, Array, Object, Boolean, etc).                                                                                                                                                                                             |
+| required | (boolean) true for required, false for not required.                                                                                                                                                                                                                            |
+| min      | (number) determines the minimum value, if it is a string it will validate the number of characters, in the case of a number it will validate its value.                                                                                                                         |
+| max      | (number) determines the maximum value, the same as the min property but pointing to a maximum value.                                                                                                                                                                            |
+| value    | assigns a value, it has to be of the same declared type, it can be a function with a return value: () => uuid; o value: 'developer', when passing a function it receives the original value as a parameter, declared in the values to be validated `(value) =>  value + '_01'`. |                                                                                                                                                                                                                                                                                     |
+| strict   | (boolean) strictly determines data type validation                                                                                                                                                                                                                              |
+| regex    | Validate using regular expression                                                                                                                                                                                                                                               ||
+
+### Using properties in the schema: some examples
+#### *type:*
+Of all the properties, type is the only one required. The data type is defined with the containers.
+example of javascript primitives:
+```json lines
+{ target: "phone", type: String }
+```
+It is also possible to define multiple data types, in this case allowing string and null data types
+```json lines
+{ target: "phone", type: [String, null] }
+```
+For the case of choice we use it in this way
+```json lines
+{ target: "phone", type: ["active", "inactive"] }
+```
+For a bit more flexibility, it is possible to configure a custom data type
+```ts
+class MyCustomValidation {
+  static __validate__(val: string) {
+    return typeof val === "string";
+  }
+}
+```
+And in this way pass MyCustomValidation as the data type to validate
+```json lines
+{ target: "phone", type: MyCustomValidation }
+```
+#### *strict:*
+if strict is true, and the type is a String, the value to validate is a numeric data, it will 
+not pass the validation, but if strict is false, it will accept the data type as a string if 
+its conversion to a string is possible; otherwise it will throw an invalid data type error.
+```js
+import Lettuce, { IScheme, TValues } from "@amateury/lettuce";
+
+function example(values: TValues[]) {
+  const sheme: IScheme[] = [
+    { target: "phone", type: String, strict: true }
+  ]
+  const lettuce = new Lettuce(sheme);
+  lettuce.parser(values).then((data) => data).catch((e) => {
+    console.log(e); // Error response
+  });
+}
+example({ phone: 20 });
+```
 
 ## Contribute
 See [contributor guide](https://github.com/amateury/lettuce/blob/main/CODE_OF_CONDUCT.md)

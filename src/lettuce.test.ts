@@ -67,3 +67,52 @@ describe("Validate schema", function () {
     expect(resp).to.deep.equal(values);
   });
 });
+
+it("Should be equal to 20", async function () {
+  const lettuce = new Lettuce(
+    [{ target: "postal_Code", type: Number, value: 20 }],
+    { postal_Code: null }
+  );
+  const resp = await lettuce.parser();
+  equal(resp.postal_Code, 20);
+});
+
+it("Should be equal to null", async function () {
+  const lettuce = new Lettuce([{ target: "postal_Code", type: Number }], {
+    postal_Code: null,
+  });
+  const resp = await lettuce.parser();
+  equal(resp.postal_Code, null);
+});
+
+it("Should be equal to {}", async function () {
+  const lettuce = new Lettuce([{ target: "postal_Code", type: Number }]);
+  const resp = await lettuce.parser();
+  expect(resp).to.deep.equal({});
+});
+
+it("Should be equal to custom", async function () {
+  class Custom {
+    static __validate__(val: string) {
+      return typeof val === "string";
+    }
+  }
+  const lettuce = new Lettuce([
+    { target: "postal_Code", type: [Status, Custom], strict: false },
+  ]);
+  const resp = await lettuce.parser({ postal_Code: "custom" });
+  expect(resp).to.deep.equal({ postal_Code: "custom" });
+});
+
+it("Should be equal to active", async function () {
+  class Custom {
+    static __validate__(val: string) {
+      return typeof val === "string";
+    }
+  }
+  const lettuce = new Lettuce([
+    { target: "postal_Code", type: [Status, Custom], strict: false },
+  ]);
+  const resp = await lettuce.parser({ postal_Code: "active" });
+  expect(resp).to.deep.equal({ postal_Code: "active" });
+});

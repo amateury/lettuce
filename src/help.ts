@@ -60,3 +60,4 @@ validate.set("String", isString);
 validate.set("Number", isNumber);
 validate.set("Object", isObject);
 validate.set("Boolean", isBoolean);
+validate.set("MyNumberType", isNumber);

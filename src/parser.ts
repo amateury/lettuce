@@ -1,8 +1,9 @@
 import { validate, isBoolean } from "./help";
+import { trip } from "./util";
 
 type TTarget = string | number;
 type TRegex = RegExp;
-type TType = any;
+type TType = any | any[];
 
 export interface IScheme {
   target: TTarget;
@@ -97,6 +98,8 @@ const validateValueType = async (
   let formatVal: any;
   if (type.name === "Array") {
     formatVal = val ? type.from(val) : val;
+  } else if (Object.prototype.hasOwnProperty.call(type, "__validate__")) {
+    await customValidateValue(val, type);
   } else {
     formatVal = val ? type(val) : val;
   }
@@ -112,26 +115,34 @@ const validateValueType = async (
  * @param type - Data type
  */
 const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
-  const keys = Object.keys(type);
-  let len: number = keys.length + 1;
-  while (--len) {
-    const typeOrPick = type[keys[keys.length - len]];
-    if (typeOrPick instanceof Function) {
-      const nameFuncType = typeOrPick.name;
+  type TTripArg = { value: TValue; len: number };
+  if (!type.length && type.length !== undefined)
+    error("The length of the type property is 0");
+  return await trip(type, async ({ value, len }: TTripArg) => {
+    if (value instanceof Function) {
+      const nameFuncType = value.name;
       try {
         const nameFuncTypeLCase = nameFuncType.toString().toLocaleLowerCase();
         /* istanbul ignore else */
-        if (nameFuncTypeLCase === typeof val) {
-          return await validateValueType(scheme, val, typeOrPick, undefined);
+        if (
+          nameFuncTypeLCase === typeof val ||
+          Object.prototype.hasOwnProperty.call(value, "__validate__")
+        ) {
+          return await validateValueType(scheme, val, value, undefined);
         }
         // eslint-disable-next-line no-empty
       } finally {
       }
     } else {
-      if (val === typeOrPick) return val;
+      if (val === value) return val;
+      else if (typeof value === "object") {
+        const resultValid = await trip(value, ({ value: v }: any) => v === val);
+        /* istanbul ignore else */
+        if (resultValid) return val;
+      }
     }
-    if (len === 1) error("pick");
-  }
+    if (len === 1) error("type");
+  });
 };
 
 /**
@@ -309,8 +320,6 @@ async function runValidation(
  * ```
  */
 export async function parserScheme(schemes: IScheme[], values: TValues = {}) {
-  let len = schemes.length + 1;
-
   type TFun = {
     _values: TValues;
     values: TValues;
@@ -337,10 +346,10 @@ export async function parserScheme(schemes: IScheme[], values: TValues = {}) {
     },
   };
 
-  while (--len) {
-    const scheme = schemes[schemes.length - len];
+  await trip(schemes, async ({ value: scheme }) => {
     const val = await valueDefault(scheme, values[scheme.target]);
     await runValidation(fun.resolution, fun.callBackErr, scheme, val);
-  }
+  });
+
   return fun._errors.length ? error(fun._errors) : fun.values;
 }

@@ -1,11 +1,15 @@
 import Lettuce, { IScheme, TValues } from "./index";
-import { expect } from "chai";
+import { assert, expect } from "chai";
 import { equal } from "assert";
 
 type TErrorValid = {
   valid: IScheme;
   targetValid: string;
   values: TValues;
+};
+
+const fnErr = function () {
+  return "Validation was successful: this for the present case is an error is an error";
 };
 
 describe("Validate schema error", function () {
@@ -51,10 +55,7 @@ describe("Validate schema error", function () {
       try {
         const lettuce = new Lettuce([valid], values);
         await lettuce.parser();
-        const fn = function () {
-          throw "Validation was successful: this for the present case is an error is an error";
-        };
-        expect(fn).to.throw(Error);
+        assert.fail(fnErr());
       } catch (e: any) {
         if (!(e instanceof Array)) {
           throw e;
@@ -78,7 +79,9 @@ describe("Custom exception", function () {
         { name: "L" }
       );
       await lettuce.parser();
+      assert.fail(fnErr());
     } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
         error: [
           "No validation custom format found: TypeError: type.__validate__ is not a function",
@@ -101,7 +104,9 @@ describe("Custom exception", function () {
         { name: 12 }
       );
       await lettuce.parser();
+      assert.fail(fnErr());
     } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
         error: ["type"],
         target: "name",
@@ -119,7 +124,9 @@ describe("min and max property error", function () {
         { postal_Code: 12 }
       );
       await lettuce.parser();
+      assert.fail(fnErr());
     } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
         error: [
           "it is not possible to evaluate the minimum value for the type: object",
@@ -137,7 +144,9 @@ describe("min and max property error", function () {
         { postal_Code: 12 }
       );
       await lettuce.parser();
+      assert.fail(fnErr());
     } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
         error: [
           "it is not possible to evaluate the maximum value for the type: object",
@@ -149,25 +158,19 @@ describe("min and max property error", function () {
   });
 });
 
-it("Should be equal to 20", async function () {
-  const lettuce = new Lettuce(
-    [{ target: "postal_Code", type: Number, value: 20 }],
-    { postal_Code: null }
-  );
-  const resp = await lettuce.parser();
-  equal(resp.postal_Code, 20);
-});
-
-it("Should be equal to null", async function () {
-  const lettuce = new Lettuce([{ target: "postal_Code", type: Number }], {
-    postal_Code: null,
-  });
-  const resp = await lettuce.parser();
-  equal(resp.postal_Code, null);
-});
-
-it("Should be equal to {}", async function () {
-  const lettuce = new Lettuce([{ target: "postal_Code", type: Number }]);
-  const resp = await lettuce.parser();
-  expect(resp).to.deep.equal({});
+it("Should fail: The length of the type property is 0", async function () {
+  try {
+    const lettuce = new Lettuce([
+      { target: "postal_Code", type: [], strict: false },
+    ]);
+    await lettuce.parser({ postal_Code: "[]" });
+    assert.fail(fnErr());
+  } catch (e: any) {
+    if (!(e instanceof Array)) throw e;
+    expect(e[0]).to.deep.equal({
+      error: ["The length of the type property is 0"],
+      target: "postal_Code",
+      value: "[]",
+    });
+  }
 });
