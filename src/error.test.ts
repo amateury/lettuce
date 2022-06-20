@@ -167,6 +167,7 @@ it("Should fail: The length of the type property is 0", async function () {
     assert.fail(fnErr());
   } catch (e: any) {
     if (!(e instanceof Array)) throw e;
+    console.log(e);
     expect(e[0]).to.deep.equal({
       error: ["The length of the type property is 0"],
       target: "postal_Code",

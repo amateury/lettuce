@@ -77,16 +77,14 @@ const customValidateValue = async (val: TValue, type: TType) => {
  * @param scheme - Type to validation
  * @param val - Value of validation
  * @param type - Data type
- * @param strict - It is a boolean to know if the data will be
- * strictly validated
  */
 const validateValueType = async (
   scheme: IScheme,
   val: TValue,
-  type: TType,
-  strict: boolean | undefined
+  type: TType
 ): Promise<TValue> => {
-  if (strict) {
+  // It is a boolean to know if the data will be strictly validated
+  if (scheme.strict) {
     const validateStrict = validate.get(type.name);
     if (validateStrict) {
       if (!validateStrict(val)) error("type");
@@ -95,7 +93,7 @@ const validateValueType = async (
     }
   }
 
-  let formatVal: any;
+  let formatVal: TValue = val;
   if (type.name === "Array") {
     formatVal = val ? type.from(val) : val;
   } else if (Object.prototype.hasOwnProperty.call(type, "__validate__")) {
@@ -103,9 +101,8 @@ const validateValueType = async (
   } else {
     formatVal = val ? type(val) : val;
   }
-  return val
-    ? await complementaryValidation(scheme, formatVal, type.name)
-    : val;
+
+  return formatVal;
 };
 
 /**
@@ -128,7 +125,7 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
           nameFuncTypeLCase === typeof val ||
           Object.prototype.hasOwnProperty.call(value, "__validate__")
         ) {
-          return await validateValueType(scheme, val, value, undefined);
+          return await validateValueType(scheme, val, value);
         }
         // eslint-disable-next-line no-empty
       } finally {
@@ -152,9 +149,8 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
  */
 const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
   const type = scheme.type; // Type to validation
-  const strict = scheme.strict; //Validation strict
   if (typeof type === "object") return await valuePick(scheme, val, type);
-  return await validateValueType(scheme, val, type, strict);
+  return await validateValueType(scheme, val, type);
 };
 
 /**
@@ -210,15 +206,17 @@ const regexValid = async (val: TValue, reg: TRegex) => {
  * @param scheme - Scheme of validation
  * @param val - Value of validation
  * @param typeName - Name function type
+ * @param callBack -
  */
 async function complementaryValidation(
   scheme: IScheme,
   val: TValue,
-  typeName: string
+  typeName: string,
+  callBack: any
 ): Promise<TValue> {
-  if (scheme.min) await min(val, scheme.min, typeName);
-  if (scheme.max) await max(val, scheme.max, typeName);
-  if (scheme.regex) await regexValid(val, scheme.regex);
+  if (scheme.min) await min(val, scheme.min, typeName).catch(callBack);
+  if (scheme.max) await max(val, scheme.max, typeName).catch(callBack);
+  if (scheme.regex) await regexValid(val, scheme.regex).catch(callBack);
 
   return val;
 }
@@ -235,7 +233,7 @@ const valueDefault = async (scheme: IScheme, val: TValue): Promise<TValue> => {
   return scheme.value !== undefined && !val ? scheme.value : val;
 };
 
-type TRValidScheme = [TErrorVal[], TValue];
+type TRValidScheme = TValue;
 
 /**
  * Function that validates the value against the schema data
@@ -247,15 +245,20 @@ async function validScheme(
   val: TValue
 ): Promise<TRValidScheme> {
   const errors: TErrorVal[] = [];
-  const strict = scheme.strict;
 
-  await isRequired(scheme.required, val).catch((e: any) => error(e));
+  await isRequired(scheme.required, val).catch((e) => error([e]));
 
-  return await valueType(scheme, val)
-    .catch((e: any) => {
-      strict ? error(e) : errors.push(e);
-    })
-    .then((resp) => [errors, resp ?? val]);
+  const formatVal = await valueType(scheme, val).catch((e) => error([e]));
+
+  const respVal = await complementaryValidation(
+    scheme,
+    formatVal,
+    scheme.type.name,
+    (e: string) => {
+      errors.push(e);
+    }
+  );
+  return !errors.length ? respVal : error(errors);
 }
 
 type TResolution = (value: [TTarget, TValue]) => void;
@@ -275,24 +278,19 @@ async function runValidation(
   val: any
 ) {
   await validScheme(scheme, val)
-    .then(([err, value]) => {
-      if (err.length) {
-        return callBackErr({
-          error: [...err],
-          target: scheme.target,
-          value: val,
-        });
-      }
+    .then((value) => {
       resolution([scheme.target, value]);
     })
     .catch((e) => {
-      error([
-        {
-          error: [e],
-          target: scheme.target,
-          value: val,
-        },
-      ]);
+      const er = {
+        error: e,
+        target: scheme.target,
+        value: val,
+      };
+      if (!scheme.strict) {
+        return callBackErr(er);
+      }
+      error([er]);
     });
 }
 
