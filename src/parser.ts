@@ -1,5 +1,5 @@
 import { validate, isBoolean } from "./help";
-import { trip } from "./util";
+import { capitalizeWord, trip } from "./util";
 
 type TTarget = string | number;
 type TRegex = RegExp;
@@ -26,6 +26,14 @@ export type TValues = {
   [index: TTarget]: TValue;
 };
 
+enum TypesErrors {
+  type = "type",
+  min = "min",
+  max = "max",
+  required = "required",
+  regex = "regex",
+}
+
 export type TErrorVal = string;
 
 export type TErrors = {
@@ -42,6 +50,10 @@ const error = (e: any) => {
   throw e;
 };
 
+const newError = (e: any) => {
+  error(new Error(e));
+};
+
 /**
  * Validate is required
  * @param required - Value required (boolean)
@@ -51,7 +63,7 @@ const isRequired = async (
   required: boolean | undefined,
   val: TValue
 ): Promise<void> => {
-  if (required && !val && !isBoolean(val)) error("required");
+  if (required && !val && !isBoolean(val)) error(TypesErrors.required);
 };
 
 /**
@@ -65,11 +77,11 @@ const customValidateValue = async (val: TValue, type: TType) => {
     const valid = await type.__validate__(val);
     /* istanbul ignore else */
     if (!valid) {
-      error("type");
+      error(TypesErrors.type);
     }
   } catch (e) {
-    if (e === "type") error(e);
-    error(`No validation custom format found: ${e}`);
+    if (e === TypesErrors.type) error(e);
+    newError(`No validation custom format found: ${e}`);
   }
 };
 /**
@@ -87,7 +99,7 @@ const validateValueType = async (
   if (scheme.strict) {
     const validateStrict = validate.get(type.name);
     if (validateStrict) {
-      if (!validateStrict(val)) error("type");
+      if (!validateStrict(val)) error(TypesErrors.type);
     } else {
       await customValidateValue(val, type);
     }
@@ -113,8 +125,7 @@ const validateValueType = async (
  */
 const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
   type TTripArg = { value: TValue; len: number };
-  if (!type.length && type.length !== undefined)
-    error("The length of the type property is 0");
+  if (!type.length && type.length !== undefined) error(TypesErrors.type);
   return await trip(type, async ({ value, len }: TTripArg) => {
     if (value instanceof Function) {
       const nameFuncType = value.name;
@@ -133,12 +144,12 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
     } else {
       if (val === value) return val;
       else if (typeof value === "object") {
-        const resultValid = await trip(value, ({ value: v }: any) => v === val);
+        const resultValid = await trip(value, ({ value: v }) => v === val);
         /* istanbul ignore else */
         if (resultValid) return val;
       }
     }
-    if (len === 1) error("type");
+    if (len === 1) error(TypesErrors.type);
   });
 };
 
@@ -149,8 +160,9 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
  */
 const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
   const type = scheme.type; // Type to validation
-  if (typeof type === "object") return await valuePick(scheme, val, type);
-  return await validateValueType(scheme, val, type);
+  return await (typeof type === "object"
+    ? valuePick(scheme, val, type)
+    : validateValueType(scheme, val, type));
 };
 
 /**
@@ -161,16 +173,13 @@ const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
  */
 const min = async (val: TValue, min: number, typeName: string) => {
   let validMin = null;
+  const _typeName = capitalizeWord(typeName);
   if (val.length) {
     validMin = val.length >= min;
-  } else if (typeName === "Number" || typeName === "BigInt") {
+  } else if (_typeName === "Number" || _typeName === "BigInt") {
     validMin = val >= min;
   }
-  if (validMin !== null && !validMin) error("min");
-  if (!validMin)
-    error(
-      `it is not possible to evaluate the minimum value for the type: ${typeof val}`
-    );
+  if ((validMin !== null && !validMin) || !validMin) error(TypesErrors.min);
   return validMin;
 };
 
@@ -182,33 +191,28 @@ const min = async (val: TValue, min: number, typeName: string) => {
  */
 const max = async (val: TValue, max: number, typeName: string) => {
   let validMin = null;
-
+  const _typeName = capitalizeWord(typeName);
   if (val.length) {
     validMin = val.length <= max;
-  } else if (typeName === "Number" || typeName === "BigInt") {
+  } else if (_typeName === "Number" || _typeName === "BigInt") {
     validMin = val <= max;
   }
-  if (validMin !== null && !validMin) error("max");
-  if (!validMin)
-    error(
-      `it is not possible to evaluate the maximum value for the type: ${typeof val}`
-    );
-
+  if ((validMin !== null && !validMin) || !validMin) error(TypesErrors.max);
   return validMin;
 };
 
 const regexValid = async (val: TValue, reg: TRegex) => {
-  if (!reg.test(val)) error("regex");
+  if (!reg.test(val)) error(TypesErrors.regex);
 };
 
 /**
- * Complementary validation: minimum value, maximum value
+ * Extra validation: minimum value, maximum value, regex
  * @param scheme - Scheme of validation
  * @param val - Value of validation
  * @param typeName - Name function type
  * @param callBack -
  */
-async function complementaryValidation(
+async function extraValidation(
   scheme: IScheme,
   val: TValue,
   typeName: string,
@@ -233,7 +237,7 @@ const valueDefault = async (scheme: IScheme, val: TValue): Promise<TValue> => {
   return scheme.value !== undefined && !val ? scheme.value : val;
 };
 
-type TRValidScheme = TValue;
+type TRValidScheme = [TValue, TErrorVal[]];
 
 /**
  * Function that validates the value against the schema data
@@ -245,20 +249,22 @@ async function validScheme(
   val: TValue
 ): Promise<TRValidScheme> {
   const errors: TErrorVal[] = [];
-
-  await isRequired(scheme.required, val).catch((e) => error([e]));
-
-  const formatVal = await valueType(scheme, val).catch((e) => error([e]));
-
-  const respVal = await complementaryValidation(
-    scheme,
-    formatVal,
-    scheme.type.name,
-    (e: string) => {
+  const pushError = (e: any) => {
+    if (e in TypesErrors) {
       errors.push(e);
+    } else {
+      error(e);
     }
-  );
-  return !errors.length ? respVal : error(errors);
+  };
+
+  await isRequired(scheme.required, val).catch(pushError);
+  const formatVal = await valueType(scheme, val).catch(pushError);
+
+  if (errors.length) return [formatVal, errors];
+
+  const typeName = typeof formatVal;
+  const respVal = await extraValidation(scheme, formatVal, typeName, pushError);
+  return [respVal, errors];
 }
 
 type TResolution = (value: [TTarget, TValue]) => void;
@@ -277,13 +283,12 @@ async function runValidation(
   scheme: IScheme,
   val: any
 ) {
-  await validScheme(scheme, val)
-    .then((value) => {
+  await validScheme(scheme, val).then(([value, errors]) => {
+    if (!errors.length) {
       resolution([scheme.target, value]);
-    })
-    .catch((e) => {
+    } else {
       const er = {
-        error: e,
+        error: errors,
         target: scheme.target,
         value: val,
       };
@@ -291,7 +296,8 @@ async function runValidation(
         return callBackErr(er);
       }
       error([er]);
-    });
+    }
+  });
 }
 
 /**

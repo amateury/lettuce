@@ -24,3 +24,8 @@ export async function trip(thing: any, callBack: (arg: TTripArg) => any) {
     if (resp) return resp;
   }
 }
+
+export function capitalizeWord(str: string) {
+  const val = str.toLowerCase();
+  return val.charAt(0).toUpperCase() + val.slice(1);
+}

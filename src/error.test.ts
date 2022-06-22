@@ -81,14 +81,9 @@ describe("Custom exception", function () {
       await lettuce.parser();
       assert.fail(fnErr());
     } catch (e: any) {
-      if (!(e instanceof Array)) throw e;
-      expect(e[0]).to.deep.equal({
-        error: [
-          "No validation custom format found: TypeError: type.__validate__ is not a function",
-        ],
-        target: "name",
-        value: "L",
-      });
+      expect(`${e}`).to.equal(
+        "Error: No validation custom format found: TypeError: type.__validate__ is not a function"
+      );
     }
   });
 
@@ -128,9 +123,7 @@ describe("min and max property error", function () {
     } catch (e: any) {
       if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
-        error: [
-          "it is not possible to evaluate the minimum value for the type: object",
-        ],
+        error: ["min"],
         target: "postal_Code",
         value: 12,
       });
@@ -148,9 +141,7 @@ describe("min and max property error", function () {
     } catch (e: any) {
       if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
-        error: [
-          "it is not possible to evaluate the maximum value for the type: object",
-        ],
+        error: ["max"],
         target: "postal_Code",
         value: 12,
       });
@@ -169,9 +160,34 @@ it("Should fail: The length of the type property is 0", async function () {
     if (!(e instanceof Array)) throw e;
     console.log(e);
     expect(e[0]).to.deep.equal({
-      error: ["The length of the type property is 0"],
+      error: ["type"],
       target: "postal_Code",
       value: "[]",
     });
+  }
+});
+
+it("Should fail: 1", async function () {
+  try {
+    const lettuce = new Lettuce([
+      {
+        target: "postal_Code",
+        type: [Number],
+        strict: false,
+        min: 125,
+        regex: /^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+      },
+      {
+        target: "code",
+        type: Number,
+        strict: false,
+        min: 125,
+      },
+    ]);
+    await lettuce.parser({ postal_Code: 124, code: 124 });
+    assert.fail(fnErr());
+  } catch (e: any) {
+    if (!(e instanceof Array)) throw e;
+    console.log(e);
   }
 });
