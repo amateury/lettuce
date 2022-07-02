@@ -1,7 +1,12 @@
 import * as parser from "./parser";
+interface TParamConstructor {
+    values?: parser.TValues;
+    strictCycle?: parser.TStrictCycle;
+}
 interface ILettuce {
     readonly schemes: parser.IScheme[];
     values?: parser.TValues;
+    config?: parser.TConfig;
 }
 declare class Lettuce implements ILettuce {
     /**
@@ -14,10 +19,13 @@ declare class Lettuce implements ILettuce {
      * @defaultValue null
      */
     values?: parser.TValues;
+    config?: parser.TConfig;
     /**
      * Creates an instance of Lettuce.
+     * @param schemas - Schemas validation
+     * @param crossing - Configuration data, and optional for validation
      */
-    constructor(schemas: parser.IScheme[], values?: parser.TValues);
-    parser(values?: parser.TValues): Promise<any>;
+    constructor(schemas: parser.IScheme[], crossing?: TParamConstructor);
+    parser(values?: parser.TValues, strictCycle?: parser.TStrictCycle): Promise<any>;
 }
 export default Lettuce;

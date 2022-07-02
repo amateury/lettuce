@@ -1,6 +1,6 @@
 declare type TTarget = string | number;
 declare type TRegex = RegExp;
-declare type TType = any;
+declare type TType = any | any[];
 export interface IScheme {
     target: TTarget;
     type: TType;
@@ -19,6 +19,13 @@ export declare type TValue = any;
 export declare type TValues = {
     [index: TTarget]: TValue;
 };
+export declare type TStrictCycle = boolean | number;
+/**
+ * Config
+ */
+export declare type TConfig = {
+    strictCycle?: TStrictCycle;
+} | null | undefined;
 export declare type TErrorVal = string;
 export declare type TErrors = {
     error: TErrorVal[];
@@ -47,6 +54,7 @@ export declare type TErrors = {
  *   password: "sW6LT#Fh",
  * }
  * ```
+ * @param config - Config
  */
-export declare function parserScheme(schemes: IScheme[], values?: TValues): Promise<TValues>;
+export declare function parserScheme(schemes: IScheme[], values: TValues | undefined, config: TConfig): Promise<TValues>;
 export {};
