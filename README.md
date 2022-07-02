@@ -161,6 +161,55 @@ function example(values: TValues[]) {
 example({ phone: 20 });
 ```
 
+### Using strict cycle
+strictCycle allows to generate errors strictly to the first error generated or
+according to the interval of errors per schema.
+```js
+import Lettuce, { IScheme, TValues } from "@amateury/lettuce";
+
+async function example(values: TValues[]) {
+  const schemas = [
+    {
+      target: "email",
+      type: String,
+      required: true,
+      strict: true,
+      regex: /^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+    },
+    {
+      target: "age",
+      type: Number,
+      min: 18,
+    },
+  ]
+  try {
+    const lettuce = new Lettuce(schemas, {
+      strictCycle: true,
+    });
+    await lettuce.parser({ email: "lettuce", age: 15 });
+  } catch (e) {
+    console.log(e.length); // 1
+  }
+}
+example({ phone: 20 });
+```
+strictCycle in interval 2:
+```js
+import Lettuce, { IScheme, TValues } from "@amateury/lettuce";
+
+async function example(values: TValues[]) {
+  try {
+    const lettuce = new Lettuce(schemas, {
+      strictCycle: 2,
+    });
+    await lettuce.parser({ email: "lettuce", age: 15 });
+  } catch (e) {
+    console.log(e.length); // 2
+  }
+}
+example({ phone: 20 });
+```
+
 ## Contribute
 See [contributor guide](https://github.com/amateury/lettuce/blob/main/CODE_OF_CONDUCT.md)
 

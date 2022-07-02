@@ -37,7 +37,10 @@ class Lettuce implements ILettuce {
     if (strictCycle) this.config = { strictCycle };
   }
 
-  async parser(values?: parser.TValues, strictCycle?: parser.TStrictCycle): Promise<any> {
+  async parser(
+    values?: parser.TValues,
+    strictCycle?: parser.TStrictCycle
+  ): Promise<any> {
     if (values) this.values = values;
     if (strictCycle) this.config = { ...this.config, strictCycle };
     return parser.parserScheme(this.schemes, this.values, this.config);
