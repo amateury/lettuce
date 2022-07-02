@@ -1,4 +1,5 @@
 # Lettuce 2.0
+[![build](https://github.com/amateury/lettuce/actions/workflows/main.yml/badge.svg)](https://github.com/amateury/lettuce/actions/workflows/main.yml) [![develop](https://github.com/amateury/lettuce/actions/workflows/develop.yml/badge.svg)](https://github.com/amateury/lettuce/actions/workflows/develop.yml) [![Coverage Status](https://coveralls.io/repos/github/amateury/lettuce/badge.svg?branch=main)](https://coveralls.io/github/amateury/lettuce?branch=main)
 
 It is a library that allows a rigorous validation of the data, according to a specific pattern (a scheme).
 
@@ -86,10 +87,11 @@ In the event that we send, we request that the password contain a minimum of 8 c
   }
 ]
 ```
-#### `Example 1.1`
+#### `Example 1.2`
 
 ### Schemes
 A schema represents a validation element, for example:
+#### `Example 2`
 ```sh
   {
     target: "name",
@@ -108,11 +110,11 @@ such a schema contains properties, each with its own validation target, for exam
 | property | description                                                                                                                                                                                                                                                                     |
 |----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | type     | Defines the type of data to validate (String, Number, Array, Object, Boolean, etc).                                                                                                                                                                                             |
-| required | (boolean) true for required, false for not required.                                                                                                                                                                                                                            |
+| required | (boolean) true for required, false for not required. Default is true                                                                                                                                                                                                            |
 | min      | (number) determines the minimum value, if it is a string it will validate the number of characters, in the case of a number it will validate its value.                                                                                                                         |
 | max      | (number) determines the maximum value, the same as the min property but pointing to a maximum value.                                                                                                                                                                            |
 | value    | assigns a value, it has to be of the same declared type, it can be a function with a return value: () => uuid; o value: 'developer', when passing a function it receives the original value as a parameter, declared in the values to be validated `(value) =>  value + '_01'`. |                                                                                                                                                                                                                                                                                     |
-| strict   | (boolean) strictly determines data type validation.                                                                                                                                                                                                                             |
+| strict   | (boolean) strictly determines data type validation. Default is true                                                                                                                                                                                                             |
 | regex    | Validate using regular expression.                                                                                                                                                                                                                                              ||
 
 ### Using properties in the schema: some examples
@@ -162,8 +164,11 @@ example({ phone: 20 });
 ```
 
 ### Using strict cycle
-strictCycle allows to generate errors strictly to the first error generated or
-according to the interval of errors per schema.
+strictCycle allows you to generate errors strictly to the first error generated or according to
+the interval of errors per schema. Each schema can generate a group of errors that are grouped
+in an object with the information of the errors that is an interval, strictCycle in true 
+represents interval 1.
+#### `Example 2.1`
 ```js
 import Lettuce, { IScheme, TValues } from "@amateury/lettuce";
 
