@@ -21,7 +21,7 @@ export async function trip(thing: any, callBack: (arg: TTripArg) => any) {
     const key = keys[index];
     const value = thing[key];
     const resp = await callBack({ value, key, thing, index, len });
-    if (resp) return resp;
+    if (resp !== undefined) return resp;
   }
 }
 

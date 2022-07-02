@@ -15,7 +15,7 @@ const fnErr = function () {
 describe("Validate schema error", function () {
   const errorValid: TErrorValid[] = [
     {
-      valid: { target: "email", type: String, required: true },
+      valid: { target: "email", type: String, required: true, strict: false },
       targetValid: "required",
       values: {},
     },
@@ -44,7 +44,12 @@ describe("Validate schema error", function () {
       values: { name: "Lettuce" },
     },
     {
-      valid: { target: "status", type: ["active", "inactive"] },
+      valid: {
+        target: "status",
+        type: ["active", "inactive"],
+        required: false,
+        strict: false,
+      },
       targetValid: "type",
       values: { status: "" },
     },
@@ -53,7 +58,9 @@ describe("Validate schema error", function () {
   errorValid.forEach(({ valid, targetValid, values }) => {
     it(`Should analyze the error schemas ${targetValid}`, async function () {
       try {
-        const lettuce = new Lettuce([valid], values);
+        const lettuce = new Lettuce([valid], {
+          values,
+        });
         await lettuce.parser();
         assert.fail(fnErr());
       } catch (e: any) {
@@ -76,7 +83,9 @@ describe("Custom exception", function () {
       class Custom {}
       const lettuce = new Lettuce(
         [{ target: "name", type: Custom, strict: true }],
-        { name: "L" }
+        {
+          values: { name: "L" },
+        }
       );
       await lettuce.parser();
       assert.fail(fnErr());
@@ -96,7 +105,9 @@ describe("Custom exception", function () {
       }
       const lettuce = new Lettuce(
         [{ target: "name", type: Custom, strict: true }],
-        { name: 12 }
+        {
+          values: { name: 12 },
+        }
       );
       await lettuce.parser();
       assert.fail(fnErr());
@@ -115,8 +126,18 @@ describe("min and max property error", function () {
   it("Is not possible to evaluate the minimum value for the type: {x}", async () => {
     try {
       const lettuce = new Lettuce(
-        [{ target: "postal_Code", type: Array, min: 3 }],
-        { postal_Code: 12 }
+        [
+          {
+            target: "postal_Code",
+            type: Array,
+            min: 3,
+            required: false,
+            strict: false,
+          },
+        ],
+        {
+          values: { postal_Code: 12 },
+        }
       );
       await lettuce.parser();
       assert.fail(fnErr());
@@ -133,8 +154,18 @@ describe("min and max property error", function () {
   it("Is not possible to evaluate the maximum value for the type: {x}", async () => {
     try {
       const lettuce = new Lettuce(
-        [{ target: "postal_Code", type: Array, max: 3 }],
-        { postal_Code: 12 }
+        [
+          {
+            target: "postal_Code",
+            type: Array,
+            max: 3,
+            required: false,
+            strict: false,
+          },
+        ],
+        {
+          values: { postal_Code: 12 },
+        }
       );
       await lettuce.parser();
       assert.fail(fnErr());
@@ -167,27 +198,61 @@ it("Should fail: The length of the type property is 0", async function () {
   }
 });
 
-it("Should fail: 1", async function () {
+it("Should throw an error with length 1 or 2", async function () {
+  const schemas = [
+    {
+      target: "email",
+      type: String,
+      required: true,
+      strict: true,
+      min: 125,
+      regex: /^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+    },
+    {
+      target: "postal_Code",
+      type: Number,
+      strict: false,
+      min: 125,
+    },
+    {
+      target: "mobile",
+      type: Number,
+      strict: false,
+      min: 125,
+    },
+  ];
   try {
-    const lettuce = new Lettuce([
-      {
-        target: "postal_Code",
-        type: [Number],
-        strict: false,
-        min: 125,
-        regex: /^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
-      },
-      {
-        target: "code",
-        type: Number,
-        strict: false,
-        min: 125,
-      },
-    ]);
-    await lettuce.parser({ postal_Code: 124, code: 124 });
+    const lettuce = new Lettuce(schemas, {
+      strictCycle: true,
+    });
+    await lettuce.parser({ email: "lettuce", postal_Code: 124, mobile: 124 });
     assert.fail(fnErr());
-  } catch (e: any) {
+  } catch (e) {
     if (!(e instanceof Array)) throw e;
-    console.log(e);
+    equal(e.length, 1);
+  }
+
+  try {
+    const lettuce = new Lettuce(schemas);
+    await lettuce.parser(
+      { email: "lettuce", postal_Code: 124, mobile: 124 },
+      true
+    );
+    assert.fail(fnErr());
+  } catch (e) {
+    if (!(e instanceof Array)) throw e;
+    equal(e.length, 1);
+  }
+
+  try {
+    const lettuce = new Lettuce(schemas);
+    await lettuce.parser(
+      { email: "lettuce", postal_Code: 124, mobile: 124 },
+      2
+    );
+    assert.fail(fnErr());
+  } catch (e) {
+    if (!(e instanceof Array)) throw e;
+    equal(e.length, 2);
   }
 });

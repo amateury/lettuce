@@ -26,6 +26,18 @@ export type TValues = {
   [index: TTarget]: TValue;
 };
 
+export type TStrictCycle = boolean | number;
+
+/**
+ * Config
+ */
+export type TConfig =
+  | {
+      strictCycle?: TStrictCycle;
+    }
+  | null
+  | undefined;
+
 enum TypesErrors {
   type = "type",
   min = "min",
@@ -50,6 +62,10 @@ const error = (e: any) => {
   throw e;
 };
 
+/**
+ * Generate new Error
+ * @param e - Error
+ */
 const newError = (e: any) => {
   error(new Error(e));
 };
@@ -128,22 +144,13 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
   if (!type.length && type.length !== undefined) error(TypesErrors.type);
   return await trip(type, async ({ value, len }: TTripArg) => {
     if (value instanceof Function) {
-      const nameFuncType = value.name;
       try {
-        const nameFuncTypeLCase = nameFuncType.toString().toLocaleLowerCase();
-        /* istanbul ignore else */
-        if (
-          nameFuncTypeLCase === typeof val ||
-          Object.prototype.hasOwnProperty.call(value, "__validate__")
-        ) {
-          return await validateValueType(scheme, val, value);
-        }
+        return await validateValueType(scheme, val, value);
         // eslint-disable-next-line no-empty
-      } finally {
-      }
+      } catch (e) {}
     } else {
       if (val === value) return val;
-      else if (typeof value === "object") {
+      else if (typeof value === "object" && value) {
         const resultValid = await trip(value, ({ value: v }) => v === val);
         /* istanbul ignore else */
         if (resultValid) return val;
@@ -218,9 +225,15 @@ async function extraValidation(
   typeName: string,
   callBack: any
 ): Promise<TValue> {
-  if (scheme.min) await min(val, scheme.min, typeName).catch(callBack);
-  if (scheme.max) await max(val, scheme.max, typeName).catch(callBack);
-  if (scheme.regex) await regexValid(val, scheme.regex).catch(callBack);
+  const valIsValid = scheme.required
+    ? scheme.required
+    : !(!val && !scheme.required);
+  if (scheme.min && valIsValid)
+    await min(val, scheme.min, typeName).catch(callBack);
+  if (scheme.max && valIsValid)
+    await max(val, scheme.max, typeName).catch(callBack);
+  if (scheme.regex && valIsValid)
+    await regexValid(val, scheme.regex).catch(callBack);
 
   return val;
 }
@@ -268,7 +281,7 @@ async function validScheme(
 }
 
 type TResolution = (value: [TTarget, TValue]) => void;
-type TCallBackErr = (value: TErrors) => void;
+type TCallBackErr = (value: TErrors, index: number) => void;
 
 /**
  * Function that serves as a bridge between validScheme and parserScheme
@@ -276,12 +289,14 @@ type TCallBackErr = (value: TErrors) => void;
  * @param callBackErr - callback that sets the values with error
  * @param scheme - Scheme
  * @param val - Value of validation
+ * @param index - Counting rate
  */
 async function runValidation(
   resolution: TResolution,
   callBackErr: TCallBackErr,
   scheme: IScheme,
-  val: any
+  val: any,
+  index: number
 ) {
   await validScheme(scheme, val).then(([value, errors]) => {
     if (!errors.length) {
@@ -292,13 +307,20 @@ async function runValidation(
         target: scheme.target,
         value: val,
       };
-      if (!scheme.strict) {
-        return callBackErr(er);
-      }
-      error([er]);
+      callBackErr(er, index);
     }
   });
 }
+
+/**
+ * Assign default values to a schema
+ * @param scheme - Schemes
+ */
+const defaultScheme = (scheme: IScheme) => ({
+  required: true,
+  strict: true,
+  ...scheme,
+});
 
 /**
  * Analyze the values provided according to your schema.
@@ -322,8 +344,13 @@ async function runValidation(
  *   password: "sW6LT#Fh",
  * }
  * ```
+ * @param config - Config
  */
-export async function parserScheme(schemes: IScheme[], values: TValues = {}) {
+export async function parserScheme(
+  schemes: IScheme[],
+  values: TValues = {},
+  config: TConfig
+) {
   type TFun = {
     _values: TValues;
     values: TValues;
@@ -345,14 +372,23 @@ export async function parserScheme(schemes: IScheme[], values: TValues = {}) {
           value: val,
         });
     },
-    callBackErr(value: TErrors) {
+    callBackErr(value: TErrors, index: number) {
       fun._errors.push(value);
+      if (
+        (config &&
+          config.strictCycle &&
+          typeof config.strictCycle === "boolean") ||
+        (config && config.strictCycle === index + 1)
+      ) {
+        error(fun._errors);
+      }
     },
   };
 
-  await trip(schemes, async ({ value: scheme }) => {
+  await trip(schemes, async ({ value, index }) => {
+    const scheme = defaultScheme(value);
     const val = await valueDefault(scheme, values[scheme.target]);
-    await runValidation(fun.resolution, fun.callBackErr, scheme, val);
+    await runValidation(fun.resolution, fun.callBackErr, scheme, val, index);
   });
 
   return fun._errors.length ? error(fun._errors) : fun.values;

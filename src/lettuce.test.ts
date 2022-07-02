@@ -7,7 +7,7 @@ enum Status {
   inactive = "inactive",
 }
 
-const scheme = [
+const schemas = [
   {
     target: "id",
     type: String,
@@ -32,13 +32,13 @@ const scheme = [
   { target: "password", type: String, required: true, strict: false, min: 8 },
   { target: "is_admin", type: Boolean, required: true, strict: true },
   { target: "arg", type: Array, required: true },
-  { target: "arg1", type: Array, required: false },
+  { target: "arg1", type: Array, required: false, strict: false },
   { target: "status", type: Status },
   { target: "age", type: Number, min: 18 },
   { target: "birth_month", type: Number, min: 1, max: 12 },
 ];
 
-const lettuce = new Lettuce(scheme);
+const lettuce = new Lettuce(schemas);
 
 describe("Validate schema", function () {
   it("Validate schema length", function () {
@@ -71,22 +71,31 @@ describe("Validate schema", function () {
 it("Should be equal to 20", async function () {
   const lettuce = new Lettuce(
     [{ target: "postal_Code", type: Number, value: 20 }],
-    { postal_Code: null }
+    {
+      values: { postal_Code: null },
+    }
   );
   const resp = await lettuce.parser();
   equal(resp.postal_Code, 20);
 });
 
 it("Should be equal to null", async function () {
-  const lettuce = new Lettuce([{ target: "postal_Code", type: Number }], {
-    postal_Code: null,
-  });
+  const lettuce = new Lettuce(
+    [{ target: "postal_Code", type: [Number, null], required: false }],
+    {
+      values: {
+        postal_Code: null,
+      },
+    }
+  );
   const resp = await lettuce.parser();
   equal(resp.postal_Code, null);
 });
 
 it("Should be equal to {}", async function () {
-  const lettuce = new Lettuce([{ target: "postal_Code", type: Number }]);
+  const lettuce = new Lettuce([
+    { target: "postal_Code", type: Number, required: false, strict: false },
+  ]);
   const resp = await lettuce.parser();
   expect(resp).to.deep.equal({});
 });
