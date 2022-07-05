@@ -1,14 +1,15 @@
-import * as parser from "./parser";
+import { TValues, TStrictCycle, IScheme, TConfig, parserScheme } from "./parser";
+
 
 interface TParamConstructor {
-  values?: parser.TValues;
-  strictCycle?: parser.TStrictCycle;
+  values?: TValues;
+  strictCycle?: TStrictCycle;
 }
 
 interface ILettuce {
-  readonly schemes: parser.IScheme[];
-  values?: parser.TValues;
-  config?: parser.TConfig;
+  readonly schemes: IScheme[];
+  values?: TValues;
+  config?: TConfig;
 }
 
 class Lettuce implements ILettuce {
@@ -16,21 +17,21 @@ class Lettuce implements ILettuce {
    * Object type property. List of validation schemes.
    * @defaultValue object
    */
-  schemes: parser.IScheme[];
+  schemes: IScheme[];
 
   /**
    * values to be validated
    * @defaultValue null
    */
-  values?: parser.TValues;
-  config?: parser.TConfig;
+  values?: TValues;
+  config?: TConfig;
 
   /**
    * Creates an instance of Lettuce.
    * @param schemas - Schemas validation
    * @param crossing - Configuration data, and optional for validation
    */
-  constructor(schemas: parser.IScheme[], crossing?: TParamConstructor) {
+  constructor(schemas: IScheme[], crossing?: TParamConstructor) {
     const { values, strictCycle } = crossing ?? {};
     this.schemes = schemas;
     if (values) this.values = values;
@@ -38,12 +39,12 @@ class Lettuce implements ILettuce {
   }
 
   async parser(
-    values?: parser.TValues,
-    strictCycle?: parser.TStrictCycle
+    values?: TValues,
+    strictCycle?: TStrictCycle
   ): Promise<any> {
     if (values) this.values = values;
     if (strictCycle) this.config = { ...this.config, strictCycle };
-    return parser.parserScheme(this.schemes, this.values, this.config);
+    return parserScheme(this.schemes, this.values, this.config);
   }
 }
 
