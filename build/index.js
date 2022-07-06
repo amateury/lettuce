@@ -1,6 +1,4 @@
-'use strict';
-
-/******************************************************************************
+'use strict';/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -62,9 +60,7 @@ function __generator(thisArg, body) {
         } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
-}
-
-/**
+}/**
  * validate if it is an array
  *
  * @param elm - element validation
@@ -119,9 +115,7 @@ validate.set("String", isString);
 validate.set("Number", isNumber);
 validate.set("Object", isObject);
 validate.set("Boolean", isBoolean);
-validate.set("MyNumberType", isNumber);
-
-/**
+validate.set("MyNumberType", isNumber);/**
  * traverse an object
  * @param thing - Object
  * @param callBack - callback function
@@ -154,9 +148,7 @@ function trip(thing, callBack) {
 function capitalizeWord(str) {
     var val = str.toLowerCase();
     return val.charAt(0).toUpperCase() + val.slice(1);
-}
-
-var TypesErrors;
+}var TypesErrors;
 (function (TypesErrors) {
     TypesErrors["type"] = "type";
     TypesErrors["min"] = "min";
@@ -596,9 +588,7 @@ function parserScheme(schemes, values, config) {
             }
         });
     });
-}
-
-var Lettuce = /** @class */ (function () {
+}var Lettuce = /** @class */ (function () {
     /**
      * Creates an instance of Lettuce.
      * @param schemas - Schemas validation
@@ -624,7 +614,4 @@ var Lettuce = /** @class */ (function () {
         });
     };
     return Lettuce;
-}());
-
-module.exports = Lettuce;
-//# sourceMappingURL=index.js.map
+}());module.exports = Lettuce;//# sourceMappingURL=index.js.map

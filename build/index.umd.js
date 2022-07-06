@@ -1,4 +1,4 @@
-/******************************************************************************
+(function(g,f){typeof exports==='object'&&typeof module!=='undefined'?module.exports=f():typeof define==='function'&&define.amd?define(f):(g=typeof globalThis!=='undefined'?globalThis:g||self,g.lettuce=f());})(this,(function(){'use strict';/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -614,4 +614,4 @@ function parserScheme(schemes, values, config) {
         });
     };
     return Lettuce;
-}());export{Lettuce as default};//# sourceMappingURL=index.es.mjs.map
+}());return Lettuce;}));//# sourceMappingURL=index.umd.js.map

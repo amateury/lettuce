@@ -12,6 +12,12 @@ export default [
         file: pkg.module,
         format: 'es',
         sourcemap: true
+      },
+      {
+        file: pkg['umd:main'],
+        format: 'umd',
+        name: "lettuce",
+        sourcemap: true
       }
     ],
     plugins: [

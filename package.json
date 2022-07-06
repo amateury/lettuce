@@ -4,7 +4,7 @@
   "description": "It is a library that allows a rigorous validation of the data, according to a specific pattern (a scheme).",
   "main": "build/index.js",
   "module": "build/index.es.mjs",
-  "jsnext:main": "build/index.es.js",
+  "umd:main": "build/index.umd.js",
   "types": "build/index.d.ts",
   "scripts": {
     "test": "mocha",
@@ -12,8 +12,7 @@
     "coveralls": "npm run coverage:report  && coveralls < coverage/lcov.info",
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --fix",
-    "build": "rollup -c --environment INCLUDE_DEPS,BUILD:production",
-    "build:dev": "rollup -c",
+    "build": "rollup -c --compact",
     "watch": "node_modules/.bin/webpack --config webpack.config.js --mode=development -w",
     "prepublish": "npm run build",
     "prepare": "husky install"
