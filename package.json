@@ -1,9 +1,10 @@
 {
   "name": "@amateury/lettuce",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "It is a library that allows a rigorous validation of the data, according to a specific pattern (a scheme).",
   "main": "build/index.js",
   "module": "build/index.es.mjs",
+  "umd:main": "build/index.umd.js",
   "types": "build/index.d.ts",
   "scripts": {
     "test": "mocha",
@@ -11,8 +12,7 @@
     "coveralls": "npm run coverage:report  && coveralls < coverage/lcov.info",
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --fix",
-    "build": "npx webpack --config webpack.config.js --mode=production",
-    "build:dev": "npx webpack --config webpack.config.js --mode=development",
+    "build": "rollup -c --compact",
     "watch": "node_modules/.bin/webpack --config webpack.config.js --mode=development -w",
     "prepublish": "npm run build",
     "prepare": "husky install"
@@ -42,6 +42,8 @@
     "@babel/preset-env": "^7.18.2",
     "@babel/preset-typescript": "^7.17.12",
     "@babel/register": "^7.17.7",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "@types/chai": "^4.3.1",
     "@types/mocha": "^9.1.1",
     "@types/node": "^17.0.35",
@@ -57,10 +59,12 @@
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
     "prettier": "^2.6.2",
+    "rollup": "^2.75.7",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-typescript2": "^0.32.1",
     "ts-loader": "^9.3.0",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.4",
-    "webpack": "^5.73.0",
-    "webpack-cli": "^4.9.2"
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4"
   }
 }
