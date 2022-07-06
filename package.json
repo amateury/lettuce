@@ -13,7 +13,6 @@
     "lint": "eslint . --ext .ts",
     "lint-fix": "eslint . --ext .ts --fix",
     "build": "rollup -c --compact",
-    "watch": "node_modules/.bin/webpack --config webpack.config.js --mode=development -w",
     "prepublish": "npm run build",
     "prepare": "husky install"
   },
