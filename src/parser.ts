@@ -209,7 +209,7 @@ const max = async (val: TValue, max: number, typeName: string) => {
 };
 
 const regexValid = async (val: TValue, reg: TRegex) => {
-  if (!reg.test(val)) error(TypesErrors.regex);
+  if (!new RegExp(reg).test(val)) error(TypesErrors.regex);
 };
 
 /**
