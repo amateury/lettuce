@@ -114,7 +114,7 @@ describe("Custom exception", function () {
     } catch (e: any) {
       if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
-        error: ["type"],
+        error: ["name_type"],
         target: "name",
         value: 12,
       });
@@ -144,7 +144,7 @@ describe("min and max property error", function () {
     } catch (e: any) {
       if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
-        error: ["min"],
+        error: ["postal_Code_min"],
         target: "postal_Code",
         value: 12,
       });
@@ -172,7 +172,7 @@ describe("min and max property error", function () {
     } catch (e: any) {
       if (!(e instanceof Array)) throw e;
       expect(e[0]).to.deep.equal({
-        error: ["max"],
+        error: ["postal_Code_max"],
         target: "postal_Code",
         value: 12,
       });
@@ -189,9 +189,8 @@ it("Should fail: The length of the type property is 0", async function () {
     assert.fail(fnErr());
   } catch (e: any) {
     if (!(e instanceof Array)) throw e;
-    console.log(e);
     expect(e[0]).to.deep.equal({
-      error: ["type"],
+      error: ["postal_Code_type"],
       target: "postal_Code",
       value: "[]",
     });
@@ -256,3 +255,69 @@ it("Should throw an error with length 1 or 2", async function () {
     equal(e.length, 2);
   }
 });
+
+
+describe("min and max property error", function () {
+  it("message 1", async function () {
+    try {
+      const lettuce = new Lettuce(
+        [
+          {
+            target: "postal_Code",
+            type: Array,
+            max: 3,
+            required: false,
+            strict: false,
+            message: "Error validation"
+          },
+          {
+            target: "phone",
+            type: String,
+            max: 10,
+            min: 10,
+            required: false,
+            strict: false,
+            message: {
+              max: "phone_max_10"
+            }
+          },
+          {
+            target: "username",
+            type: String,
+            required: true,
+            strict: true,
+            message: (message, { validKey }) => {
+              if (validKey === "required") {
+                return "username_is_required";
+              } else {
+                return message;
+              }
+            }
+          },
+        ],
+        {
+          values: { postal_Code: 12, phone: "30012343211" },
+        }
+      );
+      await lettuce.parser();
+      assert.fail(fnErr());
+    } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
+      expect(e[0]).to.deep.equal({
+        error: ["Error validation"],
+        target: "postal_Code",
+        value: 12,
+      });
+      expect(e[1]).to.deep.equal({
+        error: ["phone_max_10"],
+        target: "phone",
+        value: "30012343211",
+      });
+      expect(e[2]).to.deep.equal({
+        error: [ 'username_is_required', 'username_type' ],
+        target: 'username',
+        value: undefined
+      });
+    }
+  })
+})
