@@ -4,9 +4,10 @@ import { capitalizeWord, trip } from "./util";
 type TTarget = string | number;
 type TRegex = RegExp;
 type TType = any | any[];
+type TLabel = boolean | undefined;
+type TResponseScheme = "string" | "object";
 
-export interface IScheme {
-  target: TTarget;
+interface TProperty {
   type: TType;
   required?: boolean;
   min?: number;
@@ -14,7 +15,27 @@ export interface IScheme {
   value?: ((value: any) => any) | any;
   strict?: boolean;
   regex?: TRegex;
-  message?: any;
+  label?: TLabel;
+  response?: TResponseScheme
+}
+
+export type TArgsMessageErr = {
+  target: TTarget;
+  validKey: string;
+  valueKey: string;
+}
+
+type TArgsMessasaErrObj = { [index: string | number]: any }
+
+export type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string | TArgsMessasaErrObj
+
+type TMessage = string | TFuntinMessageErr | {
+  [P in keyof TProperty]?: string;
+}
+
+export interface IScheme extends TProperty {
+  target: TTarget;
+  message?: TMessage;
 }
 
 export type TValue = any;
@@ -46,7 +67,10 @@ enum TypesErrors {
   regex = "regex",
 }
 
-export type TErrorVal = string;
+export type TErrorVal = {
+  [index: string]: any;
+  validation: string;
+} | string | TArgsMessageErr | TArgsMessasaErrObj;
 
 export type TErrors = {
   error: TErrorVal[];
@@ -250,6 +274,46 @@ const valueDefault = async (scheme: IScheme, val: TValue): Promise<TValue> => {
   return scheme.value !== undefined && !val ? scheme.value : val;
 };
 
+function labelFormat(label: string, scheme: IScheme, type: TypesErrors) {
+  const matchScheme = {
+    "{target}": scheme.target,
+    "{validKey}": type,
+    "{valueKey}": scheme[type],
+  }
+
+  return label.replace(/\{.+?\}/g, (val: any) => {
+    const index: keyof typeof matchScheme = val;
+    return matchScheme[index];
+  })
+}
+
+/**
+ * Controlar el mensaje de respuesta de error
+ * @param scheme - Scheme of validation
+ * @param e - error type property 
+ */
+function ErrorMessage(scheme: IScheme, e: TypesErrors): TArgsMessageErr | TArgsMessasaErrObj | string {
+  if (typeof scheme.message === "string") {
+    return scheme.message;
+  }
+
+  if (typeof scheme.message === "function") {
+    return scheme.message(labelFormat("{target}_{validKey}", scheme, e), {
+      target: scheme.target,
+      validKey: e,
+      valueKey: scheme[e],
+    })
+  }
+
+  if (scheme.message) {
+    const message = scheme.message[e];
+    /* istanbul ignore else */
+    if (message) return message;
+  }
+
+  return labelFormat("{target}_{validKey}", scheme, e);
+}
+
 type TRValidScheme = [TValue, TErrorVal[]];
 
 /**
@@ -262,9 +326,9 @@ async function validScheme(
   val: TValue
 ): Promise<TRValidScheme> {
   const errors: TErrorVal[] = [];
-  const pushError = (e: any) => {
+  const pushError = (e: TypesErrors) => {
     if (e in TypesErrors) {
-      errors.push(e);
+      errors.push(ErrorMessage(scheme, e));
     } else {
       error(e);
     }
