@@ -1,8 +1,9 @@
 declare type TTarget = string | number;
 declare type TRegex = RegExp;
 declare type TType = any | any[];
-export interface IScheme {
-    target: TTarget;
+declare type TLabel = boolean | undefined;
+declare type TResponseScheme = "string" | "object";
+interface TProperty {
     type: TType;
     required?: boolean;
     min?: number;
@@ -10,7 +11,24 @@ export interface IScheme {
     value?: ((value: any) => any) | any;
     strict?: boolean;
     regex?: TRegex;
-    message?: any;
+    label?: TLabel;
+    response?: TResponseScheme;
+}
+export declare type TArgsMessageErr = {
+    target: TTarget;
+    validKey: string;
+    valueKey: string;
+};
+declare type TArgsMessasaErrObj = {
+    [index: string | number]: any;
+};
+export declare type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string | TArgsMessasaErrObj;
+declare type TMessage = string | TFuntinMessageErr | {
+    [P in keyof TProperty]?: string;
+};
+export interface IScheme extends TProperty {
+    target: TTarget;
+    message?: TMessage;
 }
 export declare type TValue = any;
 /**
@@ -26,7 +44,10 @@ export declare type TStrictCycle = boolean | number;
 export declare type TConfig = {
     strictCycle?: TStrictCycle;
 } | null | undefined;
-export declare type TErrorVal = string;
+export declare type TErrorVal = {
+    [index: string]: any;
+    validation: string;
+} | string | TArgsMessageErr | TArgsMessasaErrObj;
 export declare type TErrors = {
     error: TErrorVal[];
     target: TTarget;
