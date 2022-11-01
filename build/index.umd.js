@@ -372,7 +372,7 @@ var max = function (val, max, typeName) { return __awaiter(void 0, void 0, void 
 }); };
 var regexValid = function (val, reg) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        if (!reg.test(val))
+        if (!new RegExp(reg).test(val))
             error(TypesErrors.regex);
         return [2 /*return*/];
     });
@@ -432,6 +432,41 @@ var valueDefault = function (scheme, val) { return __awaiter(void 0, void 0, voi
         }
     });
 }); };
+function labelFormat(label, scheme, type) {
+    var matchScheme = {
+        "{target}": scheme.target,
+        "{validKey}": type,
+        "{valueKey}": scheme[type],
+    };
+    return label.replace(/\{.+?\}/g, function (val) {
+        var index = val;
+        return matchScheme[index];
+    });
+}
+/**
+ * Controlar el mensaje de respuesta de error
+ * @param scheme - Scheme of validation
+ * @param e - error type property
+ */
+function ErrorMessage(scheme, e) {
+    if (typeof scheme.message === "string") {
+        return scheme.message;
+    }
+    if (typeof scheme.message === "function") {
+        return scheme.message(labelFormat("{target}_{validKey}", scheme, e), {
+            target: scheme.target,
+            validKey: e,
+            valueKey: scheme[e],
+        });
+    }
+    if (scheme.message) {
+        var message = scheme.message[e];
+        /* istanbul ignore else */
+        if (message)
+            return message;
+    }
+    return labelFormat("{target}_{validKey}", scheme, e);
+}
 /**
  * Function that validates the value against the schema data
  * @param scheme - Scheme of validation
@@ -446,7 +481,7 @@ function validScheme(scheme, val) {
                     errors = [];
                     pushError = function (e) {
                         if (e in TypesErrors) {
-                            errors.push(e);
+                            errors.push(ErrorMessage(scheme, e));
                         }
                         else {
                             error(e);

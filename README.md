@@ -1,4 +1,4 @@
-# Lettuce 2.0
+# Lettuce 2.1
 
 [![build](https://github.com/amateury/lettuce/actions/workflows/main.yml/badge.svg)](https://github.com/amateury/lettuce/actions/workflows/main.yml) [![develop](https://github.com/amateury/lettuce/actions/workflows/develop.yml/badge.svg)](https://github.com/amateury/lettuce/actions/workflows/develop.yml) [![Coverage Status](https://coveralls.io/repos/github/amateury/lettuce/badge.svg?branch=main)](https://coveralls.io/github/amateury/lettuce?branch=main)
 
