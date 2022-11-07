@@ -65,6 +65,7 @@ enum TypesErrors {
   max = "max",
   required = "required",
   regex = "regex",
+  strict = "strict"
 }
 
 export type TErrorVal = {
@@ -136,10 +137,10 @@ const validateValueType = async (
   type: TType
 ): Promise<TValue> => {
   // It is a boolean to know if the data will be strictly validated
-  if (scheme.strict) {
+  if (scheme.strict && val !== undefined) {
     const validateStrict = validate.get(type.name);
     if (validateStrict) {
-      if (!validateStrict(val)) error(TypesErrors.type);
+      if (!validateStrict(val)) error(TypesErrors.strict);
     } else {
       await customValidateValue(val, type);
     }
@@ -173,7 +174,7 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
         // eslint-disable-next-line no-empty
       } catch (e) {}
     } else {
-      if (val === value) return val;
+      if (val === value || val === undefined) return val;
       else if (typeof value === "object" && value) {
         const resultValid = await trip(value, ({ value: v }) => v === val);
         /* istanbul ignore else */
@@ -335,6 +336,9 @@ async function validScheme(
   };
 
   await isRequired(scheme.required, val).catch(pushError);
+
+  if (errors.length) return [val, errors];
+
   const formatVal = await valueType(scheme, val).catch(pushError);
 
   if (errors.length) return [formatVal, errors];

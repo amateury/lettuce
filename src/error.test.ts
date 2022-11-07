@@ -314,7 +314,7 @@ describe("min and max property error", function () {
         value: "30012343211",
       });
       expect(e[2]).to.deep.equal({
-        error: [ 'username_is_required', 'username_type' ],
+        error: [ 'username_is_required' ],
         target: 'username',
         value: undefined
       });
