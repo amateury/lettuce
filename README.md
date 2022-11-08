@@ -1,4 +1,4 @@
-# Lettuce 2.1
+# Lettuce 2.2
 
 [![build](https://github.com/amateury/lettuce/actions/workflows/main.yml/badge.svg)](https://github.com/amateury/lettuce/actions/workflows/main.yml) [![develop](https://github.com/amateury/lettuce/actions/workflows/develop.yml/badge.svg)](https://github.com/amateury/lettuce/actions/workflows/develop.yml) [![Coverage Status](https://coveralls.io/repos/github/amateury/lettuce/badge.svg?branch=main)](https://coveralls.io/github/amateury/lettuce?branch=main)
 
@@ -128,6 +128,28 @@ such a schema contains properties, each with its own validation target, for exam
 
 ### Using properties in the schema: some examples
 
+#### *required and strict:*
+
+Add a value for a specific act: it is possible to change the validation behavior to the opposite value, for example:
+
+```sh
+{ 
+  target: "phone",
+  required: { put: false, default: true },
+  strict: { put: false, default: true },
+}
+```
+
+call:
+
+```js
+lettuce.act("put").parser(values).then((data) => {
+  console.log(data); // successful
+}).catch((e) => {
+  console.log(e); // Error response
+});
+```
+
 #### *type:*
 
 Of all the properties, type is the only one required. The data type is defined with the containers.
@@ -227,7 +249,14 @@ function example(values: TValues[]) {
       message: {
         max: "phone_max_10"
       }
-    }
+    },
+    {
+      target: "fullname",
+      type: String,
+      required: true,
+      strict: true,
+      min: 125,
+    },
   ]
   const lettuce = new Lettuce(sheme);
   lettuce.parser({ phobe: "30012343211", email: "lettuce.mail.com" }).then((data) => data).catch((e) => {
@@ -254,7 +283,13 @@ function example(values: TValues[]) {
      *    ],
      *    "target": "phone"
      *    "value": "lettuce.mail.com"
-     *  }
+     *  },
+     *  {
+     *    "error": [
+     *      "fullname_required"   
+     *    ],
+     *    "target": "fullname"
+     *  },
      * ]
      */
   });
@@ -319,21 +354,9 @@ async function example(values: TValues[]) {
 example({ phone: 20 });
 ```
 
-## Change
+## New functionality
 
-The response of the error message was changed, before an array with the messages in the key error was answered, said message was a string with the word of the validation property, for example:
-
-[usage example](https://github.com/amateury/lettuce#message)
-
-```sh
-["max", "regex"]
-```
-
-A default string is now passed that combines the validation property and the target name example:
-
-```sh
-["username_max", "username_regex"]
-```
+[act](#required-and-strict): Allow configuring a run where required or strict values can be flexible depending on the use case.
 
 ## Contribute
 

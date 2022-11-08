@@ -1,6 +1,5 @@
 import { TValues, TStrictCycle, IScheme, TConfig, parserScheme } from "./parser";
 
-
 interface TParamConstructor {
   values?: TValues;
   strictCycle?: TStrictCycle;
@@ -46,6 +45,17 @@ class Lettuce implements ILettuce {
     if (strictCycle) this.config = { ...this.config, strictCycle };
     return parserScheme(this.schemes, this.values, this.config);
   }
+  
+  act(name: string) {
+    return {
+      parser: async (values?: TValues, strictCycle?: TStrictCycle) => {
+        if (values) this.values = values;
+        if (strictCycle) this.config = { ...this.config, strictCycle };
+        return parserScheme(this.schemes, this.values, { ...this.config, actName: name });
+      }
+    };
+  }
+
 }
 
 export default Lettuce;

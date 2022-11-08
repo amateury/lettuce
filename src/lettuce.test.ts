@@ -100,6 +100,20 @@ it("Should be equal to {}", async function () {
   expect(resp).to.deep.equal({});
 });
 
+it("Should be equal to {} and { postal_Code: '714 09'  }", async function () {
+  const lettuce = new Lettuce([
+    {
+      target: "postal_Code",
+      type: String,
+      required: { act: true, default: false },
+      strict: { act: true, default: false } },
+  ]);
+  const resp = await lettuce.parser();
+  const resp1 = await lettuce.act("act").parser({ postal_Code: "714 09" });
+  expect(resp).to.deep.equal({});
+  expect(resp1).to.deep.equal({ postal_Code: "714 09" });
+});
+
 it("Should be equal to custom", async function () {
   class Custom {
     static __validate__(val: string) {
