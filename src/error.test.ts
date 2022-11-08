@@ -257,8 +257,8 @@ it("Should throw an error with length 1 or 2", async function () {
 });
 
 
-describe("min and max property error", function () {
-  it("message 1", async function () {
+describe("Message err", function () {
+  it("message function", async function () {
     try {
       const lettuce = new Lettuce(
         [
@@ -320,4 +320,55 @@ describe("min and max property error", function () {
       });
     }
   })
-})
+});
+
+describe("Act valid err", function () {
+  it("Act err", async function () {
+    const lettuce = new Lettuce([
+      {
+        target: "postal_code",
+        type: Number,
+        required: { act: true, default: true },
+        strict: { act: true, default: true } },
+    ]);
+
+    try {
+      await lettuce.parser();
+    } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
+      expect(e).to.deep.equal([
+        {
+          error: [ 'postal_code_required' ],
+          target: 'postal_code',
+          value: undefined
+        }
+      ]);
+    }
+
+    try {
+      await lettuce.act("act").parser();
+    } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
+      expect(e).to.deep.equal([
+        {
+          error: [ 'postal_code_required' ],
+          target: 'postal_code',
+          value: undefined
+        }
+      ]);
+    }
+
+    try {
+      await lettuce.act("act").parser({ postal_code: "714 09" });
+    } catch (e: any) {
+      if (!(e instanceof Array)) throw e;
+      expect(e).to.deep.equal([
+        {
+          error: [ 'postal_code_strict' ],
+          target: 'postal_code',
+          value: "714 09"
+        }
+      ]);
+    }
+  })
+});

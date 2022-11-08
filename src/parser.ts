@@ -5,10 +5,13 @@ type TTarget = string | number;
 type TRegex = RegExp;
 type TType = any | any[];
 type TLabel = boolean | undefined;
-type TResponseScheme = "string" | "object";
 
-interface TProperty {
-  type: TType;
+type TSplice<Val> = {
+  [index: string]: Val;
+  default: Val;
+}
+
+export interface IExtraProperty {
   required?: boolean;
   min?: number;
   max?: number;
@@ -16,7 +19,10 @@ interface TProperty {
   strict?: boolean;
   regex?: TRegex;
   label?: TLabel;
-  response?: TResponseScheme
+}
+
+interface IProperty extends IExtraProperty {
+  type: TType;
 }
 
 export type TArgsMessageErr = {
@@ -30,13 +36,21 @@ type TArgsMessasaErrObj = { [index: string | number]: any }
 export type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string | TArgsMessasaErrObj
 
 type TMessage = string | TFuntinMessageErr | {
-  [P in keyof TProperty]?: string;
+  [P in keyof IProperty]?: string;
 }
 
-export interface IScheme extends TProperty {
+interface IScheme1 extends IProperty {
   target: TTarget;
   message?: TMessage;
 }
+
+export type ISpliceShceme = {
+  [K in keyof IScheme1]: K extends "required" | "strict" ?
+  IScheme1[K] | TSplice<IScheme1[K]> :
+  IScheme1[K];
+}
+
+export type IScheme = ISpliceShceme;
 
 export type TValue = any;
 
@@ -55,6 +69,7 @@ export type TStrictCycle = boolean | number;
 export type TConfig =
   | {
       strictCycle?: TStrictCycle;
+      actName?: string;
     }
   | null
   | undefined;
@@ -132,7 +147,7 @@ const customValidateValue = async (val: TValue, type: TType) => {
  * @param type - Data type
  */
 const validateValueType = async (
-  scheme: IScheme,
+  scheme: IScheme1,
   val: TValue,
   type: TType
 ): Promise<TValue> => {
@@ -164,7 +179,7 @@ const validateValueType = async (
  * @param val - Value of validation
  * @param type - Data type
  */
-const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
+const valuePick = async (scheme: IScheme1, val: TValue, type: TType) => {
   type TTripArg = { value: TValue; len: number };
   if (!type.length && type.length !== undefined) error(TypesErrors.type);
   return await trip(type, async ({ value, len }: TTripArg) => {
@@ -190,7 +205,7 @@ const valuePick = async (scheme: IScheme, val: TValue, type: TType) => {
  * @param scheme - Type to validation
  * @param val - Value of validation
  */
-const valueType = async (scheme: IScheme, val: TValue): Promise<TValue> => {
+const valueType = async (scheme: IScheme1, val: TValue): Promise<TValue> => {
   const type = scheme.type; // Type to validation
   return await (typeof type === "object"
     ? valuePick(scheme, val, type)
@@ -245,7 +260,7 @@ const regexValid = async (val: TValue, reg: TRegex) => {
  * @param callBack -
  */
 async function extraValidation(
-  scheme: IScheme,
+  scheme: IScheme1,
   val: TValue,
   typeName: string,
   callBack: any
@@ -269,13 +284,13 @@ async function extraValidation(
  * @param scheme - Scheme of validation
  * @param val - Value of validation
  */
-const valueDefault = async (scheme: IScheme, val: TValue): Promise<TValue> => {
+const valueDefault = async (scheme: IScheme1, val: TValue): Promise<TValue> => {
   if (scheme.value && scheme.value instanceof Function)
     return await scheme.value(val);
   return scheme.value !== undefined && !val ? scheme.value : val;
 };
 
-function labelFormat(label: string, scheme: IScheme, type: TypesErrors) {
+function labelFormat(label: string, scheme: IScheme1, type: TypesErrors) {
   const matchScheme = {
     "{target}": scheme.target,
     "{validKey}": type,
@@ -293,7 +308,7 @@ function labelFormat(label: string, scheme: IScheme, type: TypesErrors) {
  * @param scheme - Scheme of validation
  * @param e - error type property 
  */
-function ErrorMessage(scheme: IScheme, e: TypesErrors): TArgsMessageErr | TArgsMessasaErrObj | string {
+function ErrorMessage(scheme: IScheme1, e: TypesErrors): TArgsMessageErr | TArgsMessasaErrObj | string {
   if (typeof scheme.message === "string") {
     return scheme.message;
   }
@@ -323,7 +338,7 @@ type TRValidScheme = [TValue, TErrorVal[]];
  * @param val - Value of validation
  */
 async function validScheme(
-  scheme: IScheme,
+  scheme: IScheme1,
   val: TValue
 ): Promise<TRValidScheme> {
   const errors: TErrorVal[] = [];
@@ -362,7 +377,7 @@ type TCallBackErr = (value: TErrors, index: number) => void;
 async function runValidation(
   resolution: TResolution,
   callBackErr: TCallBackErr,
-  scheme: IScheme,
+  scheme: IScheme1,
   val: any,
   index: number
 ) {
@@ -381,13 +396,46 @@ async function runValidation(
 }
 
 /**
+ * Identify actor value
+ * @param val - val is value boolean or json
+ * ```json
+ * { act: true, default: true }
+ * ```
+ * @param actName - name act
+ * @returns 
+ */
+const actValue = (val: any, actName: string): boolean | undefined => {
+  if (Object.prototype.hasOwnProperty.call(val, "default")) {
+    if(Object.prototype.hasOwnProperty.call(val, actName)) return val[actName];
+    return val["default"];
+  }
+  return val;
+}
+
+/**
+ * Extract actor value
+ * @param val - Value is value boolean or json
+ * ```json
+ * { act: true, default: true }
+ * ```
+ * @param actName - Name act
+ * @param _default - Value default
+ * @returns boolean
+ */
+function getValueAct(val: boolean, actName: string, _default: boolean): boolean | undefined {
+  if (val === undefined) return _default;
+  const value = actValue(val, actName);
+  return value === undefined && _default !== undefined ? _default : value;
+}
+
+/**
  * Assign default values to a schema
  * @param scheme - Schemes
  */
-const defaultScheme = (scheme: IScheme) => ({
-  required: true,
-  strict: true,
+const defaultScheme = (scheme: IScheme1, actName: string) => ({
   ...scheme,
+  required: getValueAct(scheme.required as boolean, actName, true),
+  strict: getValueAct(scheme.strict as boolean, actName, true),
 });
 
 /**
@@ -454,7 +502,7 @@ export async function parserScheme(
   };
 
   await trip(schemes, async ({ value, index }) => {
-    const scheme = defaultScheme(value);
+    const scheme = defaultScheme(value, config?.actName as string);
     const val = await valueDefault(scheme, values[scheme.target]);
     await runValidation(fun.resolution, fun.callBackErr, scheme, val, index);
   });

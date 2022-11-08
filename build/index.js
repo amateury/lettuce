@@ -155,6 +155,7 @@ function capitalizeWord(str) {
     TypesErrors["max"] = "max";
     TypesErrors["required"] = "required";
     TypesErrors["regex"] = "regex";
+    TypesErrors["strict"] = "strict";
 })(TypesErrors || (TypesErrors = {}));
 /**
  * Run a bug
@@ -223,11 +224,11 @@ var validateValueType = function (scheme, val, type) { return __awaiter(void 0, 
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                if (!scheme.strict) return [3 /*break*/, 3];
+                if (!(scheme.strict && val !== undefined)) return [3 /*break*/, 3];
                 validateStrict = validate.get(type.name);
                 if (!validateStrict) return [3 /*break*/, 1];
                 if (!validateStrict(val))
-                    error(TypesErrors.type);
+                    error(TypesErrors.strict);
                 return [3 /*break*/, 3];
             case 1: return [4 /*yield*/, customValidateValue(val, type)];
             case 2:
@@ -281,7 +282,7 @@ var valuePick = function (scheme, val, type) { return __awaiter(void 0, void 0, 
                                         return [3 /*break*/, 4];
                                     case 4: return [3 /*break*/, 8];
                                     case 5:
-                                        if (!(val === value)) return [3 /*break*/, 6];
+                                        if (!(val === value || val === undefined)) return [3 /*break*/, 6];
                                         return [2 /*return*/, val];
                                     case 6:
                                         if (!(typeof value === "object" && value)) return [3 /*break*/, 8];
@@ -490,6 +491,8 @@ function validScheme(scheme, val) {
                     return [4 /*yield*/, isRequired(scheme.required, val).catch(pushError)];
                 case 1:
                     _a.sent();
+                    if (errors.length)
+                        return [2 /*return*/, [val, errors]];
                     return [4 /*yield*/, valueType(scheme, val).catch(pushError)];
                 case 2:
                     formatVal = _a.sent();
