@@ -424,8 +424,7 @@ const actValue = (val: any, actName: string): boolean | undefined => {
  */
 function getValueAct(val: boolean, actName: string, _default: boolean): boolean | undefined {
   if (val === undefined) return _default;
-  const value = actValue(val, actName);
-  return value === undefined && _default !== undefined ? _default : value;
+  return actValue(val, actName);
 }
 
 /**
