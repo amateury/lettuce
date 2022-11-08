@@ -109,7 +109,7 @@ it("Should be equal to {} and { postal_Code: '714 09'  }", async function () {
       strict: { act: true, default: false } },
   ]);
   const resp = await lettuce.parser();
-  const resp1 = await lettuce.act("act").parser({ postal_Code: "714 09" });
+  const resp1 = await lettuce.act("act").parser({ postal_Code: "714 09" }, 1);
   expect(resp).to.deep.equal({});
   expect(resp1).to.deep.equal({ postal_Code: "714 09" });
 });

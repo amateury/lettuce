@@ -326,10 +326,15 @@ describe("Act valid err", function () {
   it("Act err", async function () {
     const lettuce = new Lettuce([
       {
+        target: "phone",
+        type: Number,
+      },
+      {
         target: "postal_code",
         type: Number,
         required: { act: true, default: true },
-        strict: { act: true, default: true } },
+        strict: { act: true, default: true }
+      },
     ]);
 
     try {
@@ -337,6 +342,11 @@ describe("Act valid err", function () {
     } catch (e: any) {
       if (!(e instanceof Array)) throw e;
       expect(e).to.deep.equal([
+        {
+          error: [ 'phone_required' ],
+          target: 'phone',
+          value: undefined
+        },
         {
           error: [ 'postal_code_required' ],
           target: 'postal_code',
@@ -351,6 +361,11 @@ describe("Act valid err", function () {
       if (!(e instanceof Array)) throw e;
       expect(e).to.deep.equal([
         {
+          error: [ 'phone_required' ],
+          target: 'phone',
+          value: undefined
+        },
+        {
           error: [ 'postal_code_required' ],
           target: 'postal_code',
           value: undefined
@@ -363,6 +378,11 @@ describe("Act valid err", function () {
     } catch (e: any) {
       if (!(e instanceof Array)) throw e;
       expect(e).to.deep.equal([
+        {
+          error: [ 'phone_required' ],
+          target: 'phone',
+          value: undefined
+        },
         {
           error: [ 'postal_code_strict' ],
           target: 'postal_code',
