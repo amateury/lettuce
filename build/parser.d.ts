@@ -2,9 +2,11 @@ declare type TTarget = string | number;
 declare type TRegex = RegExp;
 declare type TType = any | any[];
 declare type TLabel = boolean | undefined;
-declare type TResponseScheme = "string" | "object";
-interface TProperty {
-    type: TType;
+declare type TSplice<Val> = {
+    [index: string]: Val;
+    default: Val;
+};
+export interface IExtraProperty {
     required?: boolean;
     min?: number;
     max?: number;
@@ -12,24 +14,27 @@ interface TProperty {
     strict?: boolean;
     regex?: TRegex;
     label?: TLabel;
-    response?: TResponseScheme;
+}
+interface IProperty extends IExtraProperty {
+    type: TType;
 }
 export declare type TArgsMessageErr = {
     target: TTarget;
     validKey: string;
     valueKey: string;
 };
-declare type TArgsMessasaErrObj = {
-    [index: string | number]: any;
-};
-export declare type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string | TArgsMessasaErrObj;
+export declare type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string;
 declare type TMessage = string | TFuntinMessageErr | {
-    [P in keyof TProperty]?: string;
+    [P in keyof IProperty]?: string;
 };
-export interface IScheme extends TProperty {
+interface IScheme1 extends IProperty {
     target: TTarget;
     message?: TMessage;
 }
+export declare type ISpliceShceme = {
+    [K in keyof IScheme1]: K extends "required" | "strict" ? IScheme1[K] | TSplice<IScheme1[K]> : IScheme1[K];
+};
+export declare type IScheme = ISpliceShceme;
 export declare type TValue = any;
 /**
  * Values
@@ -43,11 +48,9 @@ export declare type TStrictCycle = boolean | number;
  */
 export declare type TConfig = {
     strictCycle?: TStrictCycle;
+    actName?: string;
 } | null | undefined;
-export declare type TErrorVal = {
-    [index: string]: any;
-    validation: string;
-} | string | TArgsMessageErr | TArgsMessasaErrObj;
+export declare type TErrorVal = string;
 export declare type TErrors = {
     error: TErrorVal[];
     target: TTarget;

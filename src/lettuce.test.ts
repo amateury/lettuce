@@ -106,7 +106,8 @@ it("Should be equal to {} and { postal_Code: '714 09'  }", async function () {
       target: "postal_Code",
       type: String,
       required: { act: true, default: false },
-      strict: { act: true, default: false } },
+      strict: { act: true, default: false },
+    },
   ]);
   const resp = await lettuce.parser();
   const resp1 = await lettuce.act("act").parser({ postal_Code: "714 09" }, 1);
