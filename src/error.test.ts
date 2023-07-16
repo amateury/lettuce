@@ -256,7 +256,6 @@ it("Should throw an error with length 1 or 2", async function () {
   }
 });
 
-
 describe("Message err", function () {
   it("message function", async function () {
     try {
@@ -268,7 +267,7 @@ describe("Message err", function () {
             max: 3,
             required: false,
             strict: false,
-            message: "Error validation"
+            message: "Error validation",
           },
           {
             target: "phone",
@@ -278,8 +277,8 @@ describe("Message err", function () {
             required: false,
             strict: false,
             message: {
-              max: "phone_max_10"
-            }
+              max: "phone_max_10",
+            },
           },
           {
             target: "username",
@@ -292,7 +291,7 @@ describe("Message err", function () {
               } else {
                 return message;
               }
-            }
+            },
           },
         ],
         {
@@ -314,12 +313,12 @@ describe("Message err", function () {
         value: "30012343211",
       });
       expect(e[2]).to.deep.equal({
-        error: [ 'username_is_required' ],
-        target: 'username',
-        value: undefined
+        error: ["username_is_required"],
+        target: "username",
+        value: undefined,
       });
     }
-  })
+  });
 });
 
 describe("Act valid err", function () {
@@ -333,7 +332,7 @@ describe("Act valid err", function () {
         target: "postal_code",
         type: Number,
         required: { act: true, default: true },
-        strict: { act: true, default: true }
+        strict: { act: true, default: true },
       },
     ]);
 
@@ -343,15 +342,15 @@ describe("Act valid err", function () {
       if (!(e instanceof Array)) throw e;
       expect(e).to.deep.equal([
         {
-          error: [ 'phone_required' ],
-          target: 'phone',
-          value: undefined
+          error: ["phone_required"],
+          target: "phone",
+          value: undefined,
         },
         {
-          error: [ 'postal_code_required' ],
-          target: 'postal_code',
-          value: undefined
-        }
+          error: ["postal_code_required"],
+          target: "postal_code",
+          value: undefined,
+        },
       ]);
     }
 
@@ -361,15 +360,15 @@ describe("Act valid err", function () {
       if (!(e instanceof Array)) throw e;
       expect(e).to.deep.equal([
         {
-          error: [ 'phone_required' ],
-          target: 'phone',
-          value: undefined
+          error: ["phone_required"],
+          target: "phone",
+          value: undefined,
         },
         {
-          error: [ 'postal_code_required' ],
-          target: 'postal_code',
-          value: undefined
-        }
+          error: ["postal_code_required"],
+          target: "postal_code",
+          value: undefined,
+        },
       ]);
     }
 
@@ -379,16 +378,16 @@ describe("Act valid err", function () {
       if (!(e instanceof Array)) throw e;
       expect(e).to.deep.equal([
         {
-          error: [ 'phone_required' ],
-          target: 'phone',
-          value: undefined
+          error: ["phone_required"],
+          target: "phone",
+          value: undefined,
         },
         {
-          error: [ 'postal_code_strict' ],
-          target: 'postal_code',
-          value: "714 09"
-        }
+          error: ["postal_code_strict"],
+          target: "postal_code",
+          value: "714 09",
+        },
       ]);
     }
-  })
+  });
 });

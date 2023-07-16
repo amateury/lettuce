@@ -9,7 +9,7 @@ type TLabel = boolean | undefined;
 type TSplice<Val> = {
   [index: string]: Val;
   default: Val;
-}
+};
 
 export interface IExtraProperty {
   required?: boolean;
@@ -29,15 +29,19 @@ export type TArgsMessageErr = {
   target: TTarget;
   validKey: string;
   valueKey: string;
-}
+};
 
-type TArgsMessasaErrObj = { [index: string | number]: any }
+export type TFuntinMessageErr = (
+  message: string,
+  args: TArgsMessageErr
+) => string;
 
-export type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string | TArgsMessasaErrObj
-
-type TMessage = string | TFuntinMessageErr | {
-  [P in keyof IProperty]?: string;
-}
+type TMessage =
+  | string
+  | TFuntinMessageErr
+  | {
+      [P in keyof IProperty]?: string;
+    };
 
 interface IScheme1 extends IProperty {
   target: TTarget;
@@ -45,10 +49,10 @@ interface IScheme1 extends IProperty {
 }
 
 export type ISpliceShceme = {
-  [K in keyof IScheme1]: K extends "required" | "strict" ?
-  IScheme1[K] | TSplice<IScheme1[K]> :
-  IScheme1[K];
-}
+  [K in keyof IScheme1]: K extends "required" | "strict"
+    ? IScheme1[K] | TSplice<IScheme1[K]>
+    : IScheme1[K];
+};
 
 export type IScheme = ISpliceShceme;
 
@@ -80,13 +84,19 @@ enum TypesErrors {
   max = "max",
   required = "required",
   regex = "regex",
-  strict = "strict"
+  strict = "strict",
 }
 
-export type TErrorVal = {
-  [index: string]: any;
-  validation: string;
-} | string | TArgsMessageErr | TArgsMessasaErrObj;
+export type TErrorVal = string;
+
+// export type TErrorVal =
+//   | {
+//       [index: string]: any;
+//       validation: string;
+//     }
+//   | string
+//   | TArgsMessageErr
+//   | TArgsMessasaErrObj;
 
 export type TErrors = {
   error: TErrorVal[];
@@ -295,20 +305,20 @@ function labelFormat(label: string, scheme: IScheme1, type: TypesErrors) {
     "{target}": scheme.target,
     "{validKey}": type,
     "{valueKey}": scheme[type],
-  }
+  };
 
   return label.replace(/\{.+?\}/g, (val: any) => {
     const index: keyof typeof matchScheme = val;
     return matchScheme[index];
-  })
+  });
 }
 
 /**
  * Controlar el mensaje de respuesta de error
  * @param scheme - Scheme of validation
- * @param e - error type property 
+ * @param e - error type property
  */
-function ErrorMessage(scheme: IScheme1, e: TypesErrors): TArgsMessageErr | TArgsMessasaErrObj | string {
+function ErrorMessage(scheme: IScheme1, e: TypesErrors): TErrorVal {
   if (typeof scheme.message === "string") {
     return scheme.message;
   }
@@ -318,7 +328,7 @@ function ErrorMessage(scheme: IScheme1, e: TypesErrors): TArgsMessageErr | TArgs
       target: scheme.target,
       validKey: e,
       valueKey: scheme[e],
-    })
+    });
   }
 
   if (scheme.message) {
@@ -364,7 +374,7 @@ async function validScheme(
 }
 
 type TResolution = (value: [TTarget, TValue]) => void;
-type TCallBackErr = (value: TErrors, index: number) => void;
+type TCallBackErr = (value: TErrors) => void;
 
 /**
  * Function that serves as a bridge between validScheme and parserScheme
@@ -378,8 +388,7 @@ async function runValidation(
   resolution: TResolution,
   callBackErr: TCallBackErr,
   scheme: IScheme1,
-  val: any,
-  index: number
+  val: any
 ) {
   await validScheme(scheme, val).then(([value, errors]) => {
     if (!errors.length) {
@@ -390,7 +399,7 @@ async function runValidation(
         target: scheme.target,
         value: val,
       };
-      callBackErr(er, index);
+      callBackErr(er);
     }
   });
 }
@@ -402,15 +411,15 @@ async function runValidation(
  * { act: true, default: true }
  * ```
  * @param actName - name act
- * @returns 
+ * @returns
  */
 const actValue = (val: any, actName: string): boolean | undefined => {
   if (Object.prototype.hasOwnProperty.call(val, "default")) {
-    if(Object.prototype.hasOwnProperty.call(val, actName)) return val[actName];
+    if (Object.prototype.hasOwnProperty.call(val, actName)) return val[actName];
     return val["default"];
   }
   return val;
-}
+};
 
 /**
  * Extract actor value
@@ -422,7 +431,11 @@ const actValue = (val: any, actName: string): boolean | undefined => {
  * @param _default - Value default
  * @returns boolean
  */
-function getValueAct(val: boolean, actName: string, _default: boolean): boolean | undefined {
+function getValueAct(
+  val: boolean,
+  actName: string,
+  _default: boolean
+): boolean | undefined {
   if (val === undefined) return _default;
   return actValue(val, actName);
 }
@@ -469,6 +482,7 @@ export async function parserScheme(
   type TFun = {
     _values: TValues;
     values: TValues;
+    _countError: number;
     _errors: TErrors[];
     resolution: TResolution;
     callBackErr: TCallBackErr;
@@ -477,6 +491,7 @@ export async function parserScheme(
   const fun: TFun = {
     _values: {},
     _errors: [],
+    _countError: 0,
     get values(): TValues {
       return this._values;
     },
@@ -487,23 +502,24 @@ export async function parserScheme(
           value: val,
         });
     },
-    callBackErr(value: TErrors, index: number) {
+    callBackErr(value: TErrors) {
       fun._errors.push(value);
       if (
         (config &&
           config.strictCycle &&
           typeof config.strictCycle === "boolean") ||
-        (config && config.strictCycle === index + 1)
+        (config && config.strictCycle === fun._countError + 1)
       ) {
         error(fun._errors);
       }
+      fun._countError++;
     },
   };
 
-  await trip(schemes, async ({ value, index }) => {
+  await trip(schemes, async ({ value }) => {
     const scheme = defaultScheme(value, config?.actName as string);
     const val = await valueDefault(scheme, values[scheme.target]);
-    await runValidation(fun.resolution, fun.callBackErr, scheme, val, index);
+    await runValidation(fun.resolution, fun.callBackErr, scheme, val);
   });
 
   return fun._errors.length ? error(fun._errors) : fun.values;

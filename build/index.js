@@ -515,7 +515,7 @@ function validScheme(scheme, val) {
  * @param val - Value of validation
  * @param index - Counting rate
  */
-function runValidation(resolution, callBackErr, scheme, val, index) {
+function runValidation(resolution, callBackErr, scheme, val) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -530,7 +530,7 @@ function runValidation(resolution, callBackErr, scheme, val, index) {
                                 target: scheme.target,
                                 value: val,
                             };
-                            callBackErr(er, index);
+                            callBackErr(er);
                         }
                     })];
                 case 1:
@@ -541,10 +541,42 @@ function runValidation(resolution, callBackErr, scheme, val, index) {
     });
 }
 /**
+ * Identify actor value
+ * @param val - val is value boolean or json
+ * ```json
+ * { act: true, default: true }
+ * ```
+ * @param actName - name act
+ * @returns
+ */
+var actValue = function (val, actName) {
+    if (Object.prototype.hasOwnProperty.call(val, "default")) {
+        if (Object.prototype.hasOwnProperty.call(val, actName))
+            return val[actName];
+        return val["default"];
+    }
+    return val;
+};
+/**
+ * Extract actor value
+ * @param val - Value is value boolean or json
+ * ```json
+ * { act: true, default: true }
+ * ```
+ * @param actName - Name act
+ * @param _default - Value default
+ * @returns boolean
+ */
+function getValueAct(val, actName, _default) {
+    if (val === undefined)
+        return _default;
+    return actValue(val, actName);
+}
+/**
  * Assign default values to a schema
  * @param scheme - Schemes
  */
-var defaultScheme = function (scheme) { return (__assign({ required: true, strict: true }, scheme)); };
+var defaultScheme = function (scheme, actName) { return (__assign(__assign({}, scheme), { required: getValueAct(scheme.required, actName, true), strict: getValueAct(scheme.strict, actName, true) })); };
 /**
  * Analyze the values provided according to your schema.
  * @param schemes - Schemes
@@ -580,6 +612,7 @@ function parserScheme(schemes, values, config) {
                     fun = {
                         _values: {},
                         _errors: [],
+                        _countError: 0,
                         get values() {
                             return this._values;
                         },
@@ -591,28 +624,29 @@ function parserScheme(schemes, values, config) {
                                     value: val,
                                 });
                         },
-                        callBackErr: function (value, index) {
+                        callBackErr: function (value) {
                             fun._errors.push(value);
                             if ((config &&
                                 config.strictCycle &&
                                 typeof config.strictCycle === "boolean") ||
-                                (config && config.strictCycle === index + 1)) {
+                                (config && config.strictCycle === fun._countError + 1)) {
                                 error(fun._errors);
                             }
+                            fun._countError++;
                         },
                     };
                     return [4 /*yield*/, trip(schemes, function (_a) {
-                            var value = _a.value, index = _a.index;
+                            var value = _a.value;
                             return __awaiter(_this, void 0, void 0, function () {
                                 var scheme, val;
                                 return __generator(this, function (_b) {
                                     switch (_b.label) {
                                         case 0:
-                                            scheme = defaultScheme(value);
+                                            scheme = defaultScheme(value, config === null || config === void 0 ? void 0 : config.actName);
                                             return [4 /*yield*/, valueDefault(scheme, values[scheme.target])];
                                         case 1:
                                             val = _b.sent();
-                                            return [4 /*yield*/, runValidation(fun.resolution, fun.callBackErr, scheme, val, index)];
+                                            return [4 /*yield*/, runValidation(fun.resolution, fun.callBackErr, scheme, val)];
                                         case 2:
                                             _b.sent();
                                             return [2 /*return*/];
@@ -650,6 +684,20 @@ function parserScheme(schemes, values, config) {
                 return [2 /*return*/, parserScheme(this.schemes, this.values, this.config)];
             });
         });
+    };
+    Lettuce.prototype.act = function (name) {
+        var _this = this;
+        return {
+            parser: function (values, strictCycle) { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    if (values)
+                        this.values = values;
+                    if (strictCycle)
+                        this.config = __assign(__assign({}, this.config), { strictCycle: strictCycle });
+                    return [2 /*return*/, parserScheme(this.schemes, this.values, __assign(__assign({}, this.config), { actName: name }))];
+                });
+            }); },
+        };
     };
     return Lettuce;
 }());module.exports = Lettuce;//# sourceMappingURL=index.js.map
