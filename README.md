@@ -124,6 +124,7 @@ such a schema contains properties, each with its own validation target, for exam
 | value    | assigns a value, it has to be of the same declared type, it can be a function with a return value: () => uuid; o value: 'developer', when passing a function it receives the original value as a parameter, declared in the values to be validated `(value) =>  value + '_01'`. |                                                                                                                                                                                                                                                                                     |
 | strict   | (boolean) strictly determines data type validation. Default is true                                                                                                                                                                                                             |
 | regex    | Validate using regular expression.
+| compare | compare the value of an objective, with another value, it can be a comparison of equals or different (equal, distinct)                                                                                                                                                                                                                                           |
 | message | (Object or string) Create custom error messages                                                                                                                                                                                                                                            ||
 
 ### Using properties in the schema: some examples
@@ -208,6 +209,67 @@ function example(values: TValues[]) {
 example({ phone: 20 });
 ```
 
+#### *compare:*
+
+Compare two values (equal, distinct)
+
+```js
+import Lettuce, { IScheme, TValues } from "@amateury/lettuce";
+
+function example(values: TValues[]) {
+  const sheme: IScheme[] = [
+    { target: "phone", type: String, required: true, strict: true },
+    {
+      target: "phone2",
+      type: String,
+      required: true,
+      strict: true,
+      compare: {
+        distinct: "phone",
+      },
+    }
+    { target: "password", type: String, required: true, strict: true },
+    {
+      target: "confirmPassword",
+      type: String,
+      required: true,
+      strict: true,
+      compare: {
+        equal: "password",
+      },
+    }
+  ]
+  const lettuce = new Lettuce(sheme);
+  lettuce.parser().then((data) => data).catch((e) => {
+    console.log(e); // Error response
+    /**
+     * [
+     * {
+     *   "error": [
+     *      "phone2_compareDistinct",  
+     *    ],
+     *    "target": "phone2"
+     *    "value": "3122345643"
+     *  },
+     *  {
+     *    "error": [
+     *      "confirmPassword_compareEqual",  
+     *    ],
+     *    "target": "confirmPassword"
+     *    "value": "$b4feiG*LNzq."
+     *  }
+     * ]
+     */
+  });
+}
+example({
+    password: "$b4feiG*LNzq",
+    confirmPassword: "$b4feiG*LNzq.",
+    phone: "3122345643",
+    phone2: "3122345643",
+});
+```
+
 #### *message:*
 
 Allows you to create custom error messages
@@ -257,6 +319,19 @@ function example(values: TValues[]) {
       strict: true,
       min: 125,
     },
+    { target: "password", type: String, required: true, strict: true },
+    {
+      target: "confirmPassword",
+      type: String,
+      required: true,
+      strict: true,
+      compare: {
+        equal: "password",
+      },
+      message: {
+        compareEqual: "Passwords do not match"
+      }
+    }
   ]
   const lettuce = new Lettuce(sheme);
   lettuce.parser({ phobe: "30012343211", email: "lettuce.mail.com" }).then((data) => data).catch((e) => {
@@ -290,6 +365,13 @@ function example(values: TValues[]) {
      *    ],
      *    "target": "fullname"
      *  },
+     *  {
+     *    "error": [
+     *      "Passwords do not match",  
+     *    ],
+     *    "target": "confirmPassword"
+     *    "value": "$b4feiG*LNzq."
+     *  }
      * ]
      */
   });

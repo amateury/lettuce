@@ -9,7 +9,7 @@ type TErrorValid = {
 };
 
 const fnErr = function () {
-  return "Validation was successful: this for the present case is an error is an error";
+  return "Validation was successful: this for the present case is an error";
 };
 
 describe("Validate schema error", function () {
@@ -70,6 +70,68 @@ describe("Validate schema error", function () {
           equal(e.length, 1);
           if (targetValid === "required") equal(e[0].value, undefined);
           equal(e[0].target, valid.target);
+          equal(e[0].error.length, 1);
+        }
+      }
+    });
+  });
+});
+
+describe("Validate schema error compare", function () {
+  const errorValid: ({ valid: IScheme[] } & Omit<TErrorValid, "valid">)[] = [
+    {
+      valid: [
+        { target: "password", type: String, required: true, strict: false },
+        {
+          target: "confirmPassword",
+          type: String,
+          required: true,
+          strict: false,
+          compare: {
+            equal: "password",
+          },
+        },
+      ],
+      targetValid: "compareEqual",
+      values: {
+        password: "$b4feiG*LNzq",
+        confirmPassword: "$b4feiG*LNzq.",
+      },
+    },
+    {
+      valid: [
+        { target: "phone", type: String, required: true, strict: false },
+        {
+          target: "phone2",
+          type: String,
+          required: true,
+          strict: false,
+          compare: {
+            distinct: "phone",
+          },
+        },
+      ],
+      targetValid: "compareDistinct",
+      values: {
+        phone: "3122345643",
+        phone2: "3122345643",
+      },
+    },
+  ];
+
+  errorValid.forEach(({ valid, targetValid, values }) => {
+    it(`Should analyze the error schemas ${targetValid}`, async function () {
+      try {
+        const lettuce = new Lettuce(valid, {
+          values,
+        });
+        await lettuce.parser();
+        assert.fail(fnErr());
+      } catch (e: any) {
+        if (!(e instanceof Array)) {
+          throw e;
+        } else {
+          equal(e.length, 1);
           equal(e[0].error.length, 1);
         }
       }
@@ -272,12 +334,12 @@ describe("Message err", function () {
           {
             target: "phone",
             type: String,
-            max: 10,
-            min: 10,
+            max: 7,
+            min: 7,
             required: false,
             strict: false,
             message: {
-              max: "phone_max_10",
+              max: "phone_max_7",
             },
           },
           {
@@ -293,9 +355,32 @@ describe("Message err", function () {
               }
             },
           },
+          {
+            target: "mobile",
+            type: String,
+            required: true,
+            strict: true,
+          },
+          {
+            target: "mobile2",
+            type: String,
+            required: true,
+            strict: true,
+            compare: {
+              distinct: "mobile",
+            },
+            message: {
+              compareDistinct: "mobile2 is equal to mobile",
+            },
+          },
         ],
         {
-          values: { postal_Code: 12, phone: "30012343211" },
+          values: {
+            postal_Code: 12,
+            phone: "34567897",
+            mobile: "30012343211",
+            mobile2: "30012343211",
+          },
         }
       );
       await lettuce.parser();
@@ -308,14 +393,19 @@ describe("Message err", function () {
         value: 12,
       });
       expect(e[1]).to.deep.equal({
-        error: ["phone_max_10"],
+        error: ["phone_max_7"],
         target: "phone",
-        value: "30012343211",
+        value: "34567897",
       });
       expect(e[2]).to.deep.equal({
         error: ["username_is_required"],
         target: "username",
         value: undefined,
+      });
+      expect(e[3]).to.deep.equal({
+        error: ["mobile2 is equal to mobile"],
+        target: "mobile2",
+        value: "30012343211",
       });
     }
   });
