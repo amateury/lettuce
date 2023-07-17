@@ -6,6 +6,12 @@ declare type TSplice<Val> = {
     [index: string]: Val;
     default: Val;
 };
+declare type TCompareValidate = (value: any, values: TValues) => boolean | string;
+export declare type TCompare = {
+    equal?: TTarget;
+    distinct?: TTarget;
+    validate?: TCompareValidate;
+};
 export interface IExtraProperty {
     required?: boolean;
     min?: number;
@@ -14,6 +20,7 @@ export interface IExtraProperty {
     strict?: boolean;
     regex?: TRegex;
     label?: TLabel;
+    compare?: TCompare;
 }
 interface IProperty extends IExtraProperty {
     type: TType;
@@ -24,9 +31,11 @@ export declare type TArgsMessageErr = {
     valueKey: string;
 };
 export declare type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string;
-declare type TMessage = string | TFuntinMessageErr | {
-    [P in keyof IProperty]?: string;
-};
+declare type TMessage = string | TFuntinMessageErr | ({
+    -readonly [P in keyof typeof TypesErrorCompare]?: string;
+} & {
+    [P in keyof Omit<IProperty, "compare">]?: string;
+});
 interface IScheme1 extends IProperty {
     target: TTarget;
     message?: TMessage;
@@ -50,6 +59,10 @@ export declare type TConfig = {
     strictCycle?: TStrictCycle;
     actName?: string;
 } | null | undefined;
+declare enum TypesErrorCompare {
+    compareDistinct = "compareDistinct",
+    compareEqual = "compareEqual"
+}
 export declare type TErrorVal = string;
 export declare type TErrors = {
     error: TErrorVal[];

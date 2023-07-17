@@ -11,6 +11,14 @@ type TSplice<Val> = {
   default: Val;
 };
 
+type TCompareValidate = (value: any, values: TValues) => boolean | string;
+
+export type TCompare = {
+  equal?: TTarget;
+  distinct?: TTarget;
+  validate?: TCompareValidate;
+};
+
 export interface IExtraProperty {
   required?: boolean;
   min?: number;
@@ -19,6 +27,7 @@ export interface IExtraProperty {
   strict?: boolean;
   regex?: TRegex;
   label?: TLabel;
+  compare?: TCompare;
 }
 
 interface IProperty extends IExtraProperty {
@@ -39,9 +48,11 @@ export type TFuntinMessageErr = (
 type TMessage =
   | string
   | TFuntinMessageErr
-  | {
-      [P in keyof IProperty]?: string;
-    };
+  | ({
+      -readonly [P in keyof typeof TypesErrorCompare]?: string;
+    } & {
+      [P in keyof Omit<IProperty, "compare">]?: string;
+    });
 
 interface IScheme1 extends IProperty {
   target: TTarget;
@@ -78,6 +89,11 @@ export type TConfig =
   | null
   | undefined;
 
+enum TypesErrorCompare {
+  compareDistinct = "compareDistinct",
+  compareEqual = "compareEqual",
+}
+
 enum TypesErrors {
   type = "type",
   min = "min",
@@ -88,15 +104,6 @@ enum TypesErrors {
 }
 
 export type TErrorVal = string;
-
-// export type TErrorVal =
-//   | {
-//       [index: string]: any;
-//       validation: string;
-//     }
-//   | string
-//   | TArgsMessageErr
-//   | TArgsMessasaErrObj;
 
 export type TErrors = {
   error: TErrorVal[];
@@ -165,6 +172,7 @@ const validateValueType = async (
   if (scheme.strict && val !== undefined) {
     const validateStrict = validate.get(type.name);
     if (validateStrict) {
+      /* istanbul ignore else */
       if (!validateStrict(val)) error(TypesErrors.strict);
     } else {
       await customValidateValue(val, type);
@@ -262,6 +270,14 @@ const regexValid = async (val: TValue, reg: TRegex) => {
   if (!new RegExp(reg).test(val)) error(TypesErrors.regex);
 };
 
+const compareEqual = async (val: TValue, valCompare: TValue) => {
+  if (val !== valCompare) error(TypesErrorCompare.compareEqual);
+};
+
+const compareDistinct = async (val: TValue, valCompare: TValue) => {
+  if (val === valCompare) error(TypesErrorCompare.compareDistinct);
+};
+
 /**
  * Extra validation: minimum value, maximum value, regex
  * @param scheme - Scheme of validation
@@ -273,7 +289,8 @@ async function extraValidation(
   scheme: IScheme1,
   val: TValue,
   typeName: string,
-  callBack: any
+  callBack: any,
+  values: TValues
 ): Promise<TValue> {
   const valIsValid = scheme.required
     ? scheme.required
@@ -284,6 +301,14 @@ async function extraValidation(
     await max(val, scheme.max, typeName).catch(callBack);
   if (scheme.regex && valIsValid)
     await regexValid(val, scheme.regex).catch(callBack);
+  if (scheme.compare && valIsValid) {
+    if (scheme.compare.equal && valIsValid)
+      await compareEqual(val, values[scheme.compare.equal]).catch(callBack);
+    if (scheme.compare.distinct && valIsValid)
+      await compareDistinct(val, values[scheme.compare.distinct]).catch(
+        callBack
+      );
+  }
 
   return val;
 }
@@ -349,11 +374,12 @@ type TRValidScheme = [TValue, TErrorVal[]];
  */
 async function validScheme(
   scheme: IScheme1,
-  val: TValue
+  val: TValue,
+  values: TValues
 ): Promise<TRValidScheme> {
   const errors: TErrorVal[] = [];
   const pushError = (e: TypesErrors) => {
-    if (e in TypesErrors) {
+    if (e in TypesErrors || e in TypesErrorCompare) {
       errors.push(ErrorMessage(scheme, e));
     } else {
       error(e);
@@ -369,7 +395,13 @@ async function validScheme(
   if (errors.length) return [formatVal, errors];
 
   const typeName = typeof formatVal;
-  const respVal = await extraValidation(scheme, formatVal, typeName, pushError);
+  const respVal = await extraValidation(
+    scheme,
+    formatVal,
+    typeName,
+    pushError,
+    values
+  );
   return [respVal, errors];
 }
 
@@ -388,9 +420,10 @@ async function runValidation(
   resolution: TResolution,
   callBackErr: TCallBackErr,
   scheme: IScheme1,
-  val: any
+  val: any,
+  values: TValues
 ) {
-  await validScheme(scheme, val).then(([value, errors]) => {
+  await validScheme(scheme, val, values).then(([value, errors]) => {
     if (!errors.length) {
       resolution([scheme.target, value]);
     } else {
@@ -519,7 +552,7 @@ export async function parserScheme(
   await trip(schemes, async ({ value }) => {
     const scheme = defaultScheme(value, config?.actName as string);
     const val = await valueDefault(scheme, values[scheme.target]);
-    await runValidation(fun.resolution, fun.callBackErr, scheme, val);
+    await runValidation(fun.resolution, fun.callBackErr, scheme, val, values);
   });
 
   return fun._errors.length ? error(fun._errors) : fun.values;

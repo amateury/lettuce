@@ -148,7 +148,12 @@ function trip(thing, callBack) {
 function capitalizeWord(str) {
     var val = str.toLowerCase();
     return val.charAt(0).toUpperCase() + val.slice(1);
-}var TypesErrors;
+}var TypesErrorCompare;
+(function (TypesErrorCompare) {
+    TypesErrorCompare["compareDistinct"] = "compareDistinct";
+    TypesErrorCompare["compareEqual"] = "compareEqual";
+})(TypesErrorCompare || (TypesErrorCompare = {}));
+var TypesErrors;
 (function (TypesErrors) {
     TypesErrors["type"] = "type";
     TypesErrors["min"] = "min";
@@ -227,6 +232,7 @@ var validateValueType = function (scheme, val, type) { return __awaiter(void 0, 
                 if (!(scheme.strict && val !== undefined)) return [3 /*break*/, 3];
                 validateStrict = validate.get(type.name);
                 if (!validateStrict) return [3 /*break*/, 1];
+                /* istanbul ignore else */
                 if (!validateStrict(val))
                     error(TypesErrors.strict);
                 return [3 /*break*/, 3];
@@ -378,6 +384,20 @@ var regexValid = function (val, reg) { return __awaiter(void 0, void 0, void 0, 
         return [2 /*return*/];
     });
 }); };
+var compareEqual = function (val, valCompare) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        if (val !== valCompare)
+            error(TypesErrorCompare.compareEqual);
+        return [2 /*return*/];
+    });
+}); };
+var compareDistinct = function (val, valCompare) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        if (val === valCompare)
+            error(TypesErrorCompare.compareDistinct);
+        return [2 /*return*/];
+    });
+}); };
 /**
  * Extra validation: minimum value, maximum value, regex
  * @param scheme - Scheme of validation
@@ -385,7 +405,7 @@ var regexValid = function (val, reg) { return __awaiter(void 0, void 0, void 0, 
  * @param typeName - Name function type
  * @param callBack -
  */
-function extraValidation(scheme, val, typeName, callBack) {
+function extraValidation(scheme, val, typeName, callBack, values) {
     return __awaiter(this, void 0, void 0, function () {
         var valIsValid;
         return __generator(this, function (_a) {
@@ -411,7 +431,20 @@ function extraValidation(scheme, val, typeName, callBack) {
                 case 5:
                     _a.sent();
                     _a.label = 6;
-                case 6: return [2 /*return*/, val];
+                case 6:
+                    if (!(scheme.compare && valIsValid)) return [3 /*break*/, 10];
+                    if (!(scheme.compare.equal && valIsValid)) return [3 /*break*/, 8];
+                    return [4 /*yield*/, compareEqual(val, values[scheme.compare.equal]).catch(callBack)];
+                case 7:
+                    _a.sent();
+                    _a.label = 8;
+                case 8:
+                    if (!(scheme.compare.distinct && valIsValid)) return [3 /*break*/, 10];
+                    return [4 /*yield*/, compareDistinct(val, values[scheme.compare.distinct]).catch(callBack)];
+                case 9:
+                    _a.sent();
+                    _a.label = 10;
+                case 10: return [2 /*return*/, val];
             }
         });
     });
@@ -473,7 +506,7 @@ function ErrorMessage(scheme, e) {
  * @param scheme - Scheme of validation
  * @param val - Value of validation
  */
-function validScheme(scheme, val) {
+function validScheme(scheme, val, values) {
     return __awaiter(this, void 0, void 0, function () {
         var errors, pushError, formatVal, typeName, respVal;
         return __generator(this, function (_a) {
@@ -481,7 +514,7 @@ function validScheme(scheme, val) {
                 case 0:
                     errors = [];
                     pushError = function (e) {
-                        if (e in TypesErrors) {
+                        if (e in TypesErrors || e in TypesErrorCompare) {
                             errors.push(ErrorMessage(scheme, e));
                         }
                         else {
@@ -499,7 +532,7 @@ function validScheme(scheme, val) {
                     if (errors.length)
                         return [2 /*return*/, [formatVal, errors]];
                     typeName = typeof formatVal;
-                    return [4 /*yield*/, extraValidation(scheme, formatVal, typeName, pushError)];
+                    return [4 /*yield*/, extraValidation(scheme, formatVal, typeName, pushError, values)];
                 case 3:
                     respVal = _a.sent();
                     return [2 /*return*/, [respVal, errors]];
@@ -515,11 +548,11 @@ function validScheme(scheme, val) {
  * @param val - Value of validation
  * @param index - Counting rate
  */
-function runValidation(resolution, callBackErr, scheme, val) {
+function runValidation(resolution, callBackErr, scheme, val, values) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, validScheme(scheme, val).then(function (_a) {
+                case 0: return [4 /*yield*/, validScheme(scheme, val, values).then(function (_a) {
                         var value = _a[0], errors = _a[1];
                         if (!errors.length) {
                             resolution([scheme.target, value]);
@@ -646,7 +679,7 @@ function parserScheme(schemes, values, config) {
                                             return [4 /*yield*/, valueDefault(scheme, values[scheme.target])];
                                         case 1:
                                             val = _b.sent();
-                                            return [4 /*yield*/, runValidation(fun.resolution, fun.callBackErr, scheme, val)];
+                                            return [4 /*yield*/, runValidation(fun.resolution, fun.callBackErr, scheme, val, values)];
                                         case 2:
                                             _b.sent();
                                             return [2 /*return*/];
