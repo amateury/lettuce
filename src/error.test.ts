@@ -117,6 +117,25 @@ describe("Validate schema error compare", function () {
         phone2: "3122345643",
       },
     },
+    {
+      valid: [
+        {
+          target: "country_code",
+          type: String,
+          required: false,
+          strict: false,
+          compare: {
+            validate(value) {
+              return isNaN(parseInt(value));
+            },
+          },
+        },
+      ],
+      targetValid: "compareValidate",
+      values: {
+        country_code: "57a",
+      },
+    },
   ];
 
   errorValid.forEach(({ valid, targetValid, values }) => {

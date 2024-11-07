@@ -28,7 +28,7 @@ declare class Lettuce implements ILettuce {
     constructor(schemas: IScheme[], crossing?: TParamConstructor);
     parser(values?: TValues, strictCycle?: TStrictCycle): Promise<any>;
     act(name: string): {
-        parser: (values?: TValues | undefined, strictCycle?: TStrictCycle | undefined) => Promise<TValues>;
+        parser: (values?: TValues, strictCycle?: TStrictCycle) => Promise<TValues>;
     };
 }
 export default Lettuce;

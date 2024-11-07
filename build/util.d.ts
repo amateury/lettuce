@@ -1,4 +1,4 @@
-export declare type TKey = string | number;
+export type TKey = string | number;
 export interface TTripArg {
     value: any;
     key: TKey;
