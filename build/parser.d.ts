@@ -1,13 +1,13 @@
-declare type TTarget = string | number;
-declare type TRegex = RegExp;
-declare type TType = any | any[];
-declare type TLabel = boolean | undefined;
-declare type TSplice<Val> = {
+type TTarget = string | number;
+type TRegex = RegExp;
+type TType = any | any[];
+type TLabel = boolean | undefined;
+type TSplice<Val> = {
     [index: string]: Val;
     default: Val;
 };
-declare type TCompareValidate = (value: any, values: TValues) => boolean | string;
-export declare type TCompare = {
+type TCompareValidate = (value: TValue, values: TValues) => boolean | string;
+export type TCompare = {
     equal?: TTarget;
     distinct?: TTarget;
     validate?: TCompareValidate;
@@ -25,13 +25,13 @@ export interface IExtraProperty {
 interface IProperty extends IExtraProperty {
     type: TType;
 }
-export declare type TArgsMessageErr = {
+export type TArgsMessageErr = {
     target: TTarget;
     validKey: string;
     valueKey: string;
 };
-export declare type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string;
-declare type TMessage = string | TFuntinMessageErr | ({
+export type TFuntinMessageErr = (message: string, args: TArgsMessageErr) => string;
+type TMessage = string | TFuntinMessageErr | ({
     -readonly [P in keyof typeof TypesErrorCompare]?: string;
 } & {
     [P in keyof Omit<IProperty, "compare">]?: string;
@@ -40,31 +40,32 @@ interface IScheme1 extends IProperty {
     target: TTarget;
     message?: TMessage;
 }
-export declare type ISpliceShceme = {
+export type ISpliceShceme = {
     [K in keyof IScheme1]: K extends "required" | "strict" ? IScheme1[K] | TSplice<IScheme1[K]> : IScheme1[K];
 };
-export declare type IScheme = ISpliceShceme;
-export declare type TValue = any;
+export type IScheme = ISpliceShceme;
+export type TValue = any;
 /**
  * Values
  */
-export declare type TValues = {
+export type TValues = {
     [index: TTarget]: TValue;
 };
-export declare type TStrictCycle = boolean | number;
+export type TStrictCycle = boolean | number;
 /**
  * Config
  */
-export declare type TConfig = {
+export type TConfig = {
     strictCycle?: TStrictCycle;
     actName?: string;
 } | null | undefined;
 declare enum TypesErrorCompare {
     compareDistinct = "compareDistinct",
-    compareEqual = "compareEqual"
+    compareEqual = "compareEqual",
+    compareValidate = "compareValidate"
 }
-export declare type TErrorVal = string;
-export declare type TErrors = {
+export type TErrorVal = string;
+export type TErrors = {
     error: TErrorVal[];
     target: TTarget;
     value: any | any[];

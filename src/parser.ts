@@ -11,7 +11,7 @@ type TSplice<Val> = {
   default: Val;
 };
 
-type TCompareValidate = (value: any, values: TValues) => boolean | string;
+type TCompareValidate = (value: TValue, values: TValues) => boolean | string;
 
 export type TCompare = {
   equal?: TTarget;
@@ -92,6 +92,7 @@ export type TConfig =
 enum TypesErrorCompare {
   compareDistinct = "compareDistinct",
   compareEqual = "compareEqual",
+  compareValidate = "compareValidate",
 }
 
 enum TypesErrors {
@@ -278,6 +279,15 @@ const compareDistinct = async (val: TValue, valCompare: TValue) => {
   if (val === valCompare) error(TypesErrorCompare.compareDistinct);
 };
 
+const compareValidate = async (
+  compare: TCompareValidate,
+  val: TValue,
+  values: TValues
+) => {
+  const valid = compare(val, values);
+  if (!valid) error(TypesErrorCompare.compareValidate);
+};
+
 /**
  * Extra validation: minimum value, maximum value, regex
  * @param scheme - Scheme of validation
@@ -308,6 +318,11 @@ async function extraValidation(
       await compareDistinct(val, values[scheme.compare.distinct]).catch(
         callBack
       );
+    if (scheme.compare.validate && valIsValid) {
+      await compareValidate(scheme.compare.validate, val, values).catch(
+        callBack
+      );
+    }
   }
 
   return val;

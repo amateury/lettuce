@@ -39,6 +39,17 @@ const schemas: IScheme[] = [
       distinct: "phone",
     },
   },
+  {
+    target: "country_code",
+    type: [String, null],
+    required: false,
+    strict: false,
+    compare: {
+      validate(value) {
+        return !isNaN(parseInt(value));
+      },
+    },
+  },
   { target: "password", type: String, required: true, strict: false, min: 8 },
   {
     target: "confirmPassword",
@@ -62,13 +73,14 @@ const lettuce = new Lettuce(schemas);
 
 describe("Validate schema", function () {
   it("Validate schema length", function () {
-    equal(lettuce?.schemes.length, 13);
+    equal(lettuce?.schemes.length, 14);
   });
   it("Parser schemes", async function () {
     const values: any = {
       email: "ds@lettuce.com",
       phone: "3122345643",
       phone2: "3132345643",
+      country_code: "57",
       name: "Bryant",
       password: "$b4feiG*LNzq",
       confirmPassword: "$b4feiG*LNzq",

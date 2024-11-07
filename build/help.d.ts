@@ -1,4 +1,4 @@
-export declare type TIsValidate = (elm: any) => boolean;
+export type TIsValidate = (elm: any) => boolean;
 /**
  * validate if it is an array
  *
